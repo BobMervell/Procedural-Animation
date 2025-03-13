@@ -251,15 +251,15 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 func rotate_base(delta:float) -> void:
 	var direction:Vector2 = IK_variables["direction"]
 	
-	var danger_margin: float = segment_3_length/3
-	var critic_margin:float = .1
+	var danger_margin: float = .2
+	var critic_margin:float = .05
 	var dist_x:float = IK_variables["intermediate_tg"].x - segment_1.position.x
 	var dist_z:float = IK_variables["intermediate_tg"].y - segment_1.position.z
-
-	if dist_x < critic_margin and dist_z < critic_margin:
+	
+	if dist_x < critic_margin:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 		return #discard unreachable values
-	elif dist_x < danger_margin and dist_z < danger_margin:
+	elif dist_x < danger_margin :
 		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
 	
 	output_direction = rota_second_order.vec2_second_order_response(
