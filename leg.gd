@@ -269,9 +269,7 @@ func extend_arms(delta:float) -> void:
 	var intermediate_tg = IK_variables["intermediate_tg"]
 	output_intermediate_target = extension_second_order.vec2_second_order_response(
 			delta,intermediate_tg,output_intermediate_target)["output"]
-	@warning_ignore("unsafe_call_argument")
 	var middle_angle:float = get_middle_angle(segment_1.segment_length,segment_2.segment_length,output_intermediate_target)
-	@warning_ignore("unsafe_call_argument")
 	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,output_intermediate_target)
 	segment_3.rotation.x = incidence_angle - middle_angle - base_angle
 	segment_2.rotation.x = middle_angle

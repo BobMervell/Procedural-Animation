@@ -5,7 +5,7 @@ extends Node3D
 @export var front_right_leg:ThreeSegmentLeg
 @export var hind_right_leg:ThreeSegmentLeg
 @export var hind_left_leg:ThreeSegmentLeg
-@export var body_target:Marker3D
+@export var body:Node3D
 
 var grounded_target_pos:Dictionary
 var grounded_legs:Array[ThreeSegmentLeg]
@@ -37,6 +37,9 @@ var old_position:Vector3
 		tilt_second_order = SecondOrderSystem.new(tilt_second_order_config)
 @export var tilt_second_order:SecondOrderSystem
 
+var body_global_position:Vector3
+var body_global_rotation:Vector3
+
 func _initiate_editor() -> void:
 	move_second_order = SecondOrderSystem.new(move_second_order_config)
 	rotation_second_order = SecondOrderSystem.new(rotation_second_order_config)
@@ -65,23 +68,43 @@ func _physics_process(delta: float) -> void:
 				) ):
 			call_deferred("_initiate_editor")
 		else:
-			
-			returning_legs_selected = false
-			
-			for leg in check_return_trot():
-				returning_legs.append(leg)
-			
-			for leg:ThreeSegmentLeg in grounded_legs:
-				leg.parent_rest_pos = get_parent_rest_pos(leg)
-				leg.is_returning = false
-				leg.target_marker.position = leg.to_local(grounded_target_pos[leg])
-			for leg:ThreeSegmentLeg in returning_legs:
-				leg.parent_rest_pos = get_parent_rest_pos(leg)
-				leg.is_returning = true
-				return_to_rest(leg,delta)
+			# need to replace to use velocity and move_and_slide()
+			update_body_state()
+			update_legs(delta)
+			move_body(delta)
+			rotate_body(delta)
+
+func update_body_state():
+	body_global_position = global_position
+	body_global_rotation = global_rotation
+
+func move_body(delta:float) -> void:
+	body.global_position = move_second_order.vec3_second_order_response(
+			delta,body_global_position,body.global_position)["output"]
+
+func rotate_body(delta:float) -> void:
+	var desired_direction:Vector2 = Vector2.from_angle(body_global_rotation.y)
+	var real_direction:Vector2 = Vector2.from_angle(body.global_rotation.y)
+	real_direction = rotation_second_order.vec2_second_order_response(
+			delta,desired_direction,real_direction)["output"]
+	body.rotation.y = real_direction.angle()
+
+func update_legs(delta:float) -> void:
+	returning_legs_selected = false
+	for leg in get_returning_pair():
+		returning_legs.append(leg)
+	
+	for leg:ThreeSegmentLeg in grounded_legs:
+		leg.parent_rest_pos = get_parent_rest_pos(leg)
+		leg.is_returning = false
+		leg.target_marker.position = leg.to_local(grounded_target_pos[leg])
+	for leg:ThreeSegmentLeg in returning_legs:
+		leg.parent_rest_pos = get_parent_rest_pos(leg)
+		leg.is_returning = true
+		return_to_rest(leg,delta)
 		old_position = position
 
-func check_return_trot() -> Array[ThreeSegmentLeg]:
+func get_returning_pair() -> Array[ThreeSegmentLeg]:
 	# worst case check twice each legs (4*2 in total)
 	var anticipated_lift:bool = true
 	for leg:ThreeSegmentLeg in returning_legs:
