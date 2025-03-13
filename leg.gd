@@ -141,7 +141,6 @@ var is_returning:bool = true:
 		else: target_pos_marker_color = Color.BLUE
 
 var parent_rest_pos:Vector2
-var parent_old_dir:Vector2
 enum ReturningPhase {LIFTING,MID_SWING,BACK_SWING}
 var returning_phase = ReturningPhase.LIFTING
 enum DesiredState {OK_ON_GROUND,NEEDS_RESTEP,MUST_RESTEP,RETURNING}
@@ -245,7 +244,6 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 	
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	top_down_tg = Vector2(target.x,target.z)
-	#print(top_down_tg-Vector2(start_pos.x,start_pos.z))
 	
 	var danger_margin: float = .2
 	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
@@ -401,7 +399,7 @@ func get_rest_pos() -> Vector3:
 	
 	var diff:Vector2 = Vector2(rest_pos.x,rest_pos.z)-rest_2D
 	
-	if diff.length_squared() < 1 : #ignore if too close
+	if diff.length_squared() < 2 : #ignore if too close
 		return rest_pos
 	
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
