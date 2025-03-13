@@ -35,23 +35,23 @@ segment_width = 1.0
 segment_height = 0.3
 
 [node name="Segment_1" parent="Base" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(-4.37114e-08, -0.941266, 0.337666, 0, 0.337666, 0.941266, -1, 4.11441e-08, -1.47599e-08, 0.25, 0, 0)
+transform = Transform3D(-4.37114e-08, -0.931466, 0.363829, 0, 0.363829, 0.931466, -1, 4.07157e-08, -1.59035e-08, 0.25, 0, 0)
 segment_length = 2.0
 segment_width = 0.5
 segment_height = 0.3
 
 [node name="Segment_2" parent="Base/Segment_1" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(1, 0, 0, 0, -0.771963, -0.635666, 0, 0.635666, -0.771963, 0, 0, 2)
+transform = Transform3D(1, 0, 0, 0, -0.735256, -0.677787, 0, 0.677787, -0.735256, 0, 0, 2)
 segment_length = 2.0
 segment_width = 0.3
 segment_height = 0.5
 
 [node name="Segment_3" parent="Base/Segment_1/Segment_2" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(1, 0, 0, 0, 0.941535, -0.336916, 0, 0.336916, 0.941535, 0, 0, 2)
+transform = Transform3D(1, 0, 0, 0, 0.931755, -0.363087, 0, 0.363087, 0.931755, 0, 0, 2)
 segment_length = 1.5
 segment_width = 0.5
 segment_height = 0.3
 
 [node name="Editor_target" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.60186, -1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.70651, -1.5, 0)
 gizmo_extents = 0.0

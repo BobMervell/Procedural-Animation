@@ -239,12 +239,11 @@ func _physics_process(delta: float) -> void:
 ### FOLLOW TARGET
 
 func get_IK_variables(target:Vector3) -> Dictionary:
+	var start_pos:Vector3 = to_local(base.global_position)
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z) 
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
-	var start_pos:Vector3 = to_local(segment_1.global_position)
-	var direction:Vector2 = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
-	@warning_ignore("unsafe_call_argument")
+	var direction = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
 	var intermediate_tg:Vector2 = get_intermediate_target(segment_3.segment_length,side_view_tg)
 	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
 
@@ -253,13 +252,12 @@ func rotate_base(delta:float) -> void:
 	
 	var danger_margin: float = .2
 	var critic_margin:float = .05
-	var dist_x:float = IK_variables["intermediate_tg"].x - segment_1.position.x
-	var dist_z:float = IK_variables["intermediate_tg"].y - segment_1.position.z
-	
-	if dist_x < critic_margin:
+	var dist_x:float = segment_3.position.x - segment_1.position.x
+	var dist_z:float = segment_3.position.z - segment_1.position.z
+	if dist_x < critic_margin and dist_z < critic_margin:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 		return #discard unreachable values
-	elif dist_x < danger_margin :
+	elif dist_x < danger_margin and dist_z < danger_margin:
 		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
 	
 	output_direction = rota_second_order.vec2_second_order_response(
@@ -395,12 +393,17 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 
 func get_rest_pos() -> Vector3:
 	var rest_2D:Vector2
-	if not parent_rest_pos:
+	if parent_rest_pos: rest_2D = parent_rest_pos
+	else:
 		rest_2D = Vector2.from_angle(base.rotation.y).normalized() * rest_distance
 		var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
 		rest_2D += Vector2(offset.x,offset.z)
-	else:
-		rest_2D = parent_rest_pos
+	
+	var diff:Vector2 = Vector2(rest_pos.x,rest_pos.z)-rest_2D
+	
+	if diff.length_squared() < 1 : #ignore if too close
+		return rest_pos
+	
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
 	var rest_position:Vector3 = to_global(Vector3(rest_2D.x,max_length,rest_2D.y))
 	var query_limit:Vector3 = to_global(Vector3(rest_2D.x,-max_length,rest_2D.y))

@@ -12,6 +12,7 @@ var diagonal_legs_1:Array[ThreeSegmentLeg]
 var diagonal_legs_2:Array[ThreeSegmentLeg]
 var returning_legs_selected:bool = false
 @export var body:Node3D
+var general_direction:Vector2
 var old_position:Vector3
 var old_dir:Vector2
 var k:int=0
@@ -93,6 +94,10 @@ func get_parent_rest_pos(leg:ThreeSegmentLeg) -> Vector2:
 	if movement_dir2D == Vector2.ZERO:
 		movement_dir2D = leg.parent_old_dir
 	else: leg.parent_old_dir = movement_dir2D
-	#rest_pos +=  movement_dir2D
+	update_general_direction(movement_dir2D)
+	rest_pos +=  movement_dir2D 
 	#print(movement_dir2D)
 	return rest_pos
+
+func update_general_direction(new_direction:Vector2) -> void:
+	general_direction = (general_direction*9 + new_direction)/10
