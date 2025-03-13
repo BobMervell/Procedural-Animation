@@ -240,26 +240,26 @@ func _physics_process(delta: float) -> void:
 
 func get_IK_variables(target:Vector3) -> Dictionary:
 	var start_pos:Vector3 = to_local(base.global_position)
-	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
-	var top_down_tg:Vector2 = Vector2(target.x,target.z) 
-	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
+	var top_down_tg:Vector2 = Vector2(target.x,target.z)
 	var direction = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
+	
+	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
+	top_down_tg = Vector2(target.x,target.z)
+	#print(top_down_tg-Vector2(start_pos.x,start_pos.z))
+	
+	var danger_margin: float = .2
+	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
+	if diff < Vector2.ZERO:
+		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
+	elif diff < Vector2.ONE * danger_margin:
+		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
+	
+	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
 	var intermediate_tg:Vector2 = get_intermediate_target(segment_3.segment_length,side_view_tg)
 	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
 
 func rotate_base(delta:float) -> void:
 	var direction:Vector2 = IK_variables["direction"]
-	
-	var danger_margin: float = .2
-	var critic_margin:float = .05
-	var dist_x:float = segment_3.position.x - segment_1.position.x
-	var dist_z:float = segment_3.position.z - segment_1.position.z
-	if dist_x < critic_margin and dist_z < critic_margin:
-		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
-		return #discard unreachable values
-	elif dist_x < danger_margin and dist_z < danger_margin:
-		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
-	
 	output_direction = rota_second_order.vec2_second_order_response(
 			delta,direction,output_direction)["output"]
 	base.rotation.y = - output_direction.angle()

@@ -15,7 +15,7 @@ albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
 [node name="World" type="Node3D"]
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.75444, -0.404201, 27.4936)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.490726, -0.404202, 37.0624)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
