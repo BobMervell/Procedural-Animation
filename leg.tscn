@@ -1,0 +1,55 @@
+[gd_scene load_steps=4 format=3 uid="uid://cwgjxcyy812jj"]
+
+[ext_resource type="Script" path="res://leg.gd" id="1_wim6m"]
+[ext_resource type="PackedScene" uid="uid://biquj5747frdg" path="res://leg_segment.tscn" id="1_xjxfj"]
+
+[sub_resource type="Curve" id="Curve_7pm4l"]
+_data = [Vector2(0, 0), 0.0, 0.965331, 0, 0, Vector2(0.897858, 0.29814), 0.0, 0.0, 0, 0, Vector2(1, 0), -7.22192, 0.0, 0, 0]
+point_count = 3
+
+[node name="Leg" type="Node3D"]
+script = ExtResource("1_wim6m")
+leg_horizontal_offset = 0.25
+rest_distance = 2.0
+returning_trajectory = SubResource("Curve_7pm4l")
+incidence_angle = 1.57
+extension_speed = 2.0
+rota_second_order_config = {
+"k": 1,
+"wo": 40,
+"xi": 1,
+"z": 0
+}
+extension_second_order_config = {
+"k": 1.0,
+"wo": 40.0,
+"xi": 1.0,
+"z": 0.0
+}
+
+[node name="Base" parent="." instance=ExtResource("1_xjxfj")]
+segment_length = 0.5
+segment_width = 1.0
+segment_height = 0.3
+
+[node name="Segment_1" parent="Base" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(-4.37114e-08, -0.697722, 0.716369, 0, 0.716369, 0.697722, -1, 3.04984e-08, -3.13135e-08, 0.25, 0, 0)
+segment_length = 2.0
+segment_width = 0.5
+segment_height = 0.3
+
+[node name="Segment_2" parent="Base/Segment_1" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, 0.0263685, -0.999651, 0, 0.999651, 0.0263685, 0, 0, 2)
+segment_length = 2.0
+segment_width = 0.3
+segment_height = 0.5
+
+[node name="Segment_3" parent="Base/Segment_1/Segment_2" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, 0.698292, -0.715813, 0, 0.715813, 0.698292, 0, 0, 2)
+segment_length = 1.5
+segment_width = 0.5
+segment_height = 0.3
+
+[node name="Editor_target" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.11667, -1.5, 0)
+gizmo_extents = 0.0

@@ -1,0 +1,125 @@
+[gd_scene load_steps=6 format=3 uid="uid://h0dto0xiarh4"]
+
+[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://leg.tscn" id="2_o1g6v"]
+[ext_resource type="Script" path="res://4_radial_legged_controller.gd" id="3_fwq8x"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ikg7"]
+albedo_color = Color(0.145098, 0, 0, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ba2c8"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d0tfp"]
+albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
+
+[node name="World" type="Node3D"]
+
+[node name="Robot" type="Node3D" parent="."]
+transform = Transform3D(0.198256, 0, -0.98015, 0, 1, 0, 0.98015, 0, 0.198256, 2.92869, 2.74182e-06, 20.1616)
+
+[node name="Head" type="CSGBox3D" parent="Robot"]
+material_override = SubResource("StandardMaterial3D_2ikg7")
+size = Vector3(1.41666, 1.41553, 2.55945)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Robot/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.793864, -0.0132736, -0.187812)
+size = Vector3(0.145996, 0.439606, 1.19818)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Robot/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.791458, -0.0265472, -0.159627)
+size = Vector3(0.145996, 0.439606, 1.19818)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Robot/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, 0.792448, 0.664126, -0.872775)
+size = Vector3(0.0645752, 0.171875, 1.33545)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="Robot/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, -0.750102, 0.668437, -0.861898)
+size = Vector3(0.0645752, 0.171875, 1.33545)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Robot/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.24566)
+operation = 2
+size = Vector3(1, 1, 0.122803)
+
+[node name="Neck" type="CSGCylinder3D" parent="Robot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.796676, 0)
+height = 0.207148
+
+[node name="Base" type="CSGBox3D" parent="Robot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.13995, 0)
+size = Vector3(2.7, 0.488, 2.7)
+
+[node name="4_radial_legged_controller" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body")]
+script = ExtResource("3_fwq8x")
+front_left_leg = NodePath("LegFL")
+front_right_leg = NodePath("LegFR")
+hind_right_leg = NodePath("LegHR")
+hind_left_leg = NodePath("LegHL")
+body = NodePath("..")
+
+[node name="LegFL" parent="Robot/4_radial_legged_controller" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 1.25, -1.5, 1.25)
+leg_horizontal_offset = 0.5
+extension_speed = 10.0
+rota_second_order = NodePath("")
+extension_second_order_config = {
+"k": 1.0,
+"wo": 100.0,
+"xi": 1.5,
+"z": 0.0
+}
+extension_second_order = NodePath("")
+show_path = false
+
+[node name="LegFR" parent="Robot/4_radial_legged_controller" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -1.25, -1.5, 1.25)
+leg_horizontal_offset = 0.5
+extension_speed = 10.0
+rota_second_order = NodePath("")
+extension_second_order_config = {
+"k": 1.0,
+"wo": 100.0,
+"xi": 1.5,
+"z": 0.0
+}
+extension_second_order = NodePath("")
+show_path = false
+
+[node name="LegHR" parent="Robot/4_radial_legged_controller" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -1.25, -1.5, -1.25)
+leg_horizontal_offset = 0.5
+extension_speed = 10.0
+rota_second_order = NodePath("")
+extension_second_order_config = {
+"k": 1.0,
+"wo": 100.0,
+"xi": 1.5,
+"z": 0.0
+}
+extension_second_order = NodePath("")
+show_path = false
+
+[node name="LegHL" parent="Robot/4_radial_legged_controller" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 1.25, -1.5, -1.25)
+leg_horizontal_offset = 0.5
+extension_speed = 10.0
+rota_second_order = NodePath("")
+extension_second_order_config = {
+"k": 1.0,
+"wo": 100.0,
+"xi": 1.5,
+"z": 0.0
+}
+extension_second_order = NodePath("")
+show_path = false
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_ba2c8")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Area3D"]
+material_override = SubResource("StandardMaterial3D_d0tfp")
+size = Vector3(100, 1, 100)
