@@ -35,7 +35,7 @@ segment_width = 1.0
 segment_height = 0.3
 
 [node name="Segment_1" parent="Base" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(-4.37114e-08, -0.999977, 0.00675252, 0, 0.00675252, 0.999977, -1, 4.37104e-08, -2.95162e-10, 0.25, 0, 0)
+transform = Transform3D(-4.37114e-08, -0.999977, 0.00675251, 0, 0.00675251, 0.999977, -1, 4.37104e-08, -2.95162e-10, 0.25, 0, 0)
 segment_length = 2.0
 segment_width = 0.5
 segment_height = 0.3
@@ -47,7 +47,7 @@ segment_width = 0.3
 segment_height = 0.5
 
 [node name="Segment_3" parent="Base/Segment_1/Segment_2" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(1, 0, 0, 0, 0.999982, -0.00592088, 0, 0.00592088, 0.999982, 0, 0, 2)
+transform = Transform3D(1, 0, 0, 0, 0.999982, -0.00592091, 0, 0.00592091, 0.999982, 0, 0, 2)
 segment_length = 1.5
 segment_width = 0.5
 segment_height = 0.3

@@ -5,7 +5,7 @@ extends Node3D
 @export var front_right_leg:ThreeSegmentLeg
 @export var hind_right_leg:ThreeSegmentLeg
 @export var hind_left_leg:ThreeSegmentLeg
-@export var body:Node3D
+@export var body:CharacterBody3D
 
 var grounded_target_pos:Dictionary
 var grounded_legs:Array[ThreeSegmentLeg]
@@ -37,7 +37,8 @@ var old_position:Vector3
 		tilt_second_order = SecondOrderSystem.new(tilt_second_order_config)
 @export var tilt_second_order:SecondOrderSystem
 
-var body_global_position:Vector3
+var old_body_pos:Vector3
+var body_velocity:Vector3
 var body_global_rotation:Vector3
 
 func _initiate_editor() -> void:
@@ -68,19 +69,32 @@ func _physics_process(delta: float) -> void:
 				) ):
 			call_deferred("_initiate_editor")
 		else:
-			# need to replace to use velocity and move_and_slide()
-			update_body_state()
+			update_body_state(delta)
 			update_legs(delta)
 			move_body(delta)
 			rotate_body(delta)
 
-func update_body_state():
-	body_global_position = global_position
+func update_body_state(delta:float):
+	if Engine.is_editor_hint():
+		body_velocity = (global_position - old_body_pos)/delta
+		old_body_pos = global_position
+	else:
+		var SPEED = 5
+		var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		if direction:
+			body_velocity.x = direction.x * SPEED
+			body_velocity.z = direction.z * SPEED
+		else:
+			body_velocity.x = 0
+			body_velocity.z = 0
 	body_global_rotation = global_rotation
 
 func move_body(delta:float) -> void:
-	body.global_position = move_second_order.vec3_second_order_response(
-			delta,body_global_position,body.global_position)["output"]
+	body.velocity = move_second_order.vec3_second_order_response(
+			delta,body_velocity,body.velocity)["output"]
+	body.move_and_slide()
+	#print(body_velocity)
 
 func rotate_body(delta:float) -> void:
 	var desired_direction:Vector2 = Vector2.from_angle(body_global_rotation.y)

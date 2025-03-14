@@ -14,8 +14,9 @@ albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
 
 [node name="World" type="Node3D"]
 
-[node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(-0.0368854, 0, 0.999252, 0, 1, 0, -0.999252, 0, -0.0368854, -9.85434, 0.265718, 12.57)
+[node name="Robot" type="CharacterBody3D" parent="."]
+transform = Transform3D(0.999984, 0, 0, 0, 1, 0, 0, 0, 0.999984, 0, 0, 11.1193)
+velocity = Vector3(-1.4013e-45, 0, 0)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -107,7 +108,7 @@ extension_second_order = NodePath("")
 show_path = false
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order", "tilt_second_order")]
-transform = Transform3D(-0.036888, 0, 0.999318, 0, 1, 0, -0.99932, 0, -0.0368879, -9.85434, 0.265718, 12.57)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.278)
 script = ExtResource("3_fwq8x")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
@@ -118,13 +119,13 @@ move_second_order_config = {
 "k": 1.0,
 "wo": 40.0,
 "xi": 1.0,
-"z": 0.1
+"z": 0.0
 }
 move_second_order = NodePath("")
 rotation_second_order_config = {
-"k": 1,
+"k": 1.0,
 "wo": 30.0,
-"xi": 0.5,
+"xi": 0.4,
 "z": 0.05
 }
 rotation_second_order = NodePath("")
