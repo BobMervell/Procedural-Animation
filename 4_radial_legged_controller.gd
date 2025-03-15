@@ -13,8 +13,8 @@ var returning_legs:Array[ThreeSegmentLeg]
 var diagonal_legs_1:Array[ThreeSegmentLeg]
 var diagonal_legs_2:Array[ThreeSegmentLeg]
 var returning_legs_selected:bool = false
-var old_position:Vector3
-@export var body_direction_impact:float = 1.2
+## height of legs base
+@export var body_desired_height:float = 4
 
 @export_group("Move second order")
 @export var move_second_order_config:Dictionary:
@@ -34,22 +34,34 @@ var old_position:Vector3
 @export var tilt_second_order_config:Dictionary:
 	set(new_value):
 		tilt_second_order_config = new_value
-		tilt_second_order = SecondOrderSystem.new(tilt_second_order_config)
+		tilt_x_second_order = SecondOrderSystem.new(tilt_second_order_config)
+		tilt_z_second_order = SecondOrderSystem.new(tilt_second_order_config)
+		height_second_order = SecondOrderSystem.new(tilt_second_order_config)
 @export var tilt_second_order:SecondOrderSystem
 
+var tilt_x_second_order:SecondOrderSystem
+var tilt_z_second_order:SecondOrderSystem
+var height_second_order:SecondOrderSystem
+
+var leg_heights:Dictionary
 var old_body_pos:Vector3
 var body_velocity:Vector3
-var body_global_rotation:Vector3
+var body_rotation:Vector3
 
 func _initiate_editor() -> void:
+	body.global_position = global_position
+	old_body_pos = global_position
 	move_second_order = SecondOrderSystem.new(move_second_order_config)
 	rotation_second_order = SecondOrderSystem.new(rotation_second_order_config)
-	tilt_second_order = SecondOrderSystem.new(tilt_second_order_config)
+	tilt_x_second_order = SecondOrderSystem.new(tilt_second_order_config)
+	tilt_z_second_order = SecondOrderSystem.new(tilt_second_order_config)
+	height_second_order = SecondOrderSystem.new(tilt_second_order_config)
 
 	front_left_leg.rotation.y = -PI/4
 	front_right_leg.rotation.y = -3*PI/4
 	hind_right_leg.rotation.y = 3*PI/4
 	hind_left_leg.rotation.y = PI/4
+	
 	grounded_legs.append(front_left_leg)
 	grounded_legs.append(front_right_leg)
 	grounded_legs.append(hind_right_leg)
@@ -59,8 +71,11 @@ func _initiate_editor() -> void:
 	diagonal_legs_2.append(front_right_leg)
 	diagonal_legs_2.append(hind_left_leg)
 	for leg:ThreeSegmentLeg in grounded_legs:
-		leg.parent_rest_pos = get_parent_rest_pos(leg)
+		leg.base.rotation.y = 0
+		leg.movement_dir = Vector3.ZERO
+		leg.leg_height = body_desired_height
 		grounded_target_pos[leg] = leg.to_global(leg.get_rest_pos())
+		leg_heights[leg] = 0
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -71,52 +86,95 @@ func _physics_process(delta: float) -> void:
 		else:
 			update_body_state(delta)
 			update_legs(delta)
+			get_leg_heights()
 			move_body(delta)
-			rotate_body(delta)
+			update_body_height()
+			body.rotation.y = get_second_order_angle(delta,body.rotation.y,body_rotation.y)
+			tilt_body(delta)
+			old_body_pos = global_position
 
 func update_body_state(delta:float):
 	if Engine.is_editor_hint():
 		body_velocity = (global_position - old_body_pos)/delta
-		old_body_pos = global_position
-	else:
-		var SPEED = 5
-		var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		if direction:
-			body_velocity.x = direction.x * SPEED
-			body_velocity.z = direction.z * SPEED
-		else:
-			body_velocity.x = 0
-			body_velocity.z = 0
-	body_global_rotation = global_rotation
+		
+	else: pass
+	body_rotation = rotation
 
 func move_body(delta:float) -> void:
 	body.velocity = move_second_order.vec3_second_order_response(
 			delta,body_velocity,body.velocity)["output"]
+	body.velocity.y = 0
 	body.move_and_slide()
-	#print(body_velocity)
 
-func rotate_body(delta:float) -> void:
-	var desired_direction:Vector2 = Vector2.from_angle(body_global_rotation.y)
-	var real_direction:Vector2 = Vector2.from_angle(body.global_rotation.y)
+func get_leg_heights():
+	for leg:ThreeSegmentLeg in leg_heights:
+		if not leg.is_returning:
+			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
+
+func update_body_height() -> void:
+	var max_length:float = (front_left_leg.segment_1.segment_length  + 
+			front_left_leg.segment_2.segment_length +
+			front_left_leg.segment_3.segment_length)
+	var query_start:Vector3 = body.global_position
+	var query_limit:Vector3 = query_start + Vector3(0,-max_length,0)
+	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(query_start,query_limit)
+	query.collide_with_areas = true
+	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	if not result.is_empty():
+		global_position.y = lerp(body.global_position.y,result["position"].y + body_desired_height,.1)
+		body.global_position.y = global_position.y
+
+func update_tilt() -> void:
+	var front_height = max(leg_heights[front_left_leg],leg_heights[front_right_leg])
+	var hind_height = max(leg_heights[hind_left_leg],leg_heights[hind_right_leg])
+	var left_height = max(leg_heights[front_left_leg],leg_heights[hind_left_leg])
+	var right_height = max(leg_heights[front_right_leg],leg_heights[hind_right_leg])
+	var x_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
+		front_right_leg.to_global(front_right_leg.rest_pos))
+	var z_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
+		hind_left_leg.to_global(hind_left_leg.rest_pos))
+	
+	
+	var x_angle = asin((hind_height - front_height)/z_size)
+	var z_angle = asin((left_height - right_height)/x_size)
+	#print(deg_to_rad(rotation.x-x_angle))
+	#print(front_height - hind_height)
+	#print(asin((1)))
+	rotation.x = x_angle
+	rotation.z = z_angle
+
+func tilt_body(delta:float) -> void:
+	update_tilt()
+	#print(leg_heights)
+	#print(rad_to_deg(rotation.x))
+	body.rotation.x = lerp(body.rotation.x,rotation.x,.05)
+	body.rotation.z = lerp(body.rotation.z,rotation.z,.05)
+	#body.rotation.z = rotation.z
+	#body.rotation.x = get_second_order_angle(delta,body.rotation.x,body_rotation.x)
+	#body.rotation.z = get_second_order_angle(delta,body.rotation.z,body_rotation.z)
+
+func get_second_order_angle(delta:float,current_angle,new_angle) -> float:
+	var desired_direction:Vector2 = Vector2.from_angle(new_angle)
+	var real_direction:Vector2 = Vector2.from_angle(current_angle)
 	real_direction = rotation_second_order.vec2_second_order_response(
 			delta,desired_direction,real_direction)["output"]
-	body.rotation.y = real_direction.angle()
+	return real_direction.angle()
 
 func update_legs(delta:float) -> void:
 	returning_legs_selected = false
+	var movement_dir = old_body_pos.direction_to(global_position)
+	movement_dir = Vector3(movement_dir.x,0,movement_dir.z).normalized()#discard y movement
 	for leg in get_returning_pair():
 		returning_legs.append(leg)
 	
 	for leg:ThreeSegmentLeg in grounded_legs:
-		leg.parent_rest_pos = get_parent_rest_pos(leg)
+		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
 		leg.is_returning = false
 		leg.target_marker.position = leg.to_local(grounded_target_pos[leg])
 	for leg:ThreeSegmentLeg in returning_legs:
-		leg.parent_rest_pos = get_parent_rest_pos(leg)
+		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
 		leg.is_returning = true
 		return_to_rest(leg,delta)
-		old_position = position
 
 func get_returning_pair() -> Array[ThreeSegmentLeg]:
 	# worst case check twice each legs (4*2 in total)
@@ -143,12 +201,3 @@ func return_to_rest(leg:ThreeSegmentLeg,delta:float) -> void:
 		returning_legs.erase(leg)
 		grounded_target_pos[leg] = leg.to_global(leg_rest)
 	leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position)
-
-func get_parent_rest_pos(leg:ThreeSegmentLeg) -> Vector2:
-	var leg_dir:Vector3 = leg.to_local(global_position).direction_to(leg.base.position)
-	var rest_pos:Vector2 = Vector2(leg_dir.x,leg_dir.z).normalized() * leg.rest_distance
-	var movement_dir = leg.to_local(old_position).direction_to(
-				leg.to_local(position))
-	var movement_dir2D = Vector2(movement_dir.x,movement_dir.z).normalized()
-	rest_pos +=  movement_dir2D * body_direction_impact
-	return rest_pos

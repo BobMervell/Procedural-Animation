@@ -14,6 +14,7 @@ rest_distance = 2.0
 returning_trajectory = SubResource("Curve_7pm4l")
 incidence_angle = 1.57
 extension_speed = 2.0
+move_direction_impact = null
 rota_second_order_config = {
 "k": 1,
 "wo": 40,

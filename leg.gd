@@ -77,8 +77,8 @@ var leg_offset:Vector3 = Vector3.ZERO
 ## Incidence angle of the third segment relative to the ground.
 @export_range(0,PI,.01) var incidence_angle:float
 ## Controls the speed of leg's extension/retraction.
-@export var extension_speed:float = 4
-
+@export var extension_speed:float = 10
+@export var move_direction_impact:float = 1.2
 
 @export_subgroup("Rotation second order")
 ## Configuration weights for rotation second order controller.
@@ -125,6 +125,7 @@ var path_array:Array[Vector3]
 var path_mesh:MeshInstance3D
 
 
+var leg_height:float
 var output_intermediate_target:Vector2
 var last_extended_position:Vector3 = Vector3.ZERO
 var rest_pos:Vector3
@@ -140,7 +141,7 @@ var is_returning:bool = true:
 		if is_returning: target_pos_marker_color = Color.MAGENTA
 		else: target_pos_marker_color = Color.BLUE
 
-var parent_rest_pos:Vector2
+var movement_dir:Vector3
 enum ReturningPhase {LIFTING,MID_SWING,BACK_SWING}
 var returning_phase = ReturningPhase.LIFTING
 enum DesiredState {OK_ON_GROUND,NEEDS_RESTEP,MUST_RESTEP,RETURNING}
@@ -388,28 +389,26 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 	return target_pos
 
 func get_rest_pos() -> Vector3:
-	var rest_2D:Vector2
-	if parent_rest_pos: rest_2D = parent_rest_pos
-	else:
-		rest_2D = Vector2.from_angle(base.rotation.y).normalized() * rest_distance
-		var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
-		rest_2D += Vector2(offset.x,offset.z)
+	if is_returning: return rest_pos
 	
-	var diff:Vector2 = Vector2(rest_pos.x,rest_pos.z)-rest_2D
+	var rest_position = (Vector3(rest_distance,0,0) -
+			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-rotation.y))
 	
-	if diff.length_squared() < 2 : #ignore if too close
-		return rest_pos
+	#var diff = rest_position - rest_pos
+	#if  is_returning and diff.length_squared() > 1 : #don't update on return
+		#return rest_pos
 	
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
-	var rest_position:Vector3 = to_global(Vector3(rest_2D.x,max_length,rest_2D.y))
-	var query_limit:Vector3 = to_global(Vector3(rest_2D.x,-max_length,rest_2D.y))
-	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(rest_position,query_limit)
+	var query_limit:Vector3 = rest_position + Vector3(0,-max_length,0)
+	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(rest_position),to_global(query_limit))
 	query.collide_with_areas = true
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	
 	if not result.is_empty():
 		rest_position = to_local(result["position"])
 	else:
-		rest_position.y = segment_3.segment_end.global_position.y - segment_3.global_position.y
+		rest_position.y = -leg_height - position.y
+
 	return rest_position
 
 func get_returning_height() -> float:
