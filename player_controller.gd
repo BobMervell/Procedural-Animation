@@ -1,12 +1,12 @@
 @tool
 extends RadialQuadripedController
 
-const SPEED = 10
+const SPEED:float = 10
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint():
-		var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		var direction := ((transform.basis * Vector3(input_dir.x, 0, input_dir.y))
+		var input_dir:Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		var direction:Vector3 = ((transform.basis * Vector3(input_dir.x, 0, input_dir.y))
 				.normalized().rotated(Vector3.UP,body.global_rotation.y + 3*PI/4))
 		if direction:
 			body_velocity.x = direction.x * SPEED
