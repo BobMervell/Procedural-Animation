@@ -6,17 +6,17 @@ const MARKER:PackedScene = preload("res://marker.tscn")
 
 @export_group("Simulation details")
 ## Activates a walk cycle simulation.
-@export var walk_simulation:bool = false
-var simulation_target:Vector3 = Vector3(10,0,0)
+@export var _walk_simulation:bool = false
+var _simulation_target:Vector3 = Vector3(10,0,0)
 ## Controls the rotation angle of the leg (in radians).
-@export_range(-PI,PI,.01) var simulation_rotation:float = 0:
+@export_range(-PI,PI,.01) var _simulation_rotation:float = 0:
 	set(new_value):
-		simulation_rotation = new_value
-		simulation_target.x = 10 * cos(simulation_rotation)
-		simulation_target.z = 10 * sin(simulation_rotation)
+		_simulation_rotation = new_value
+		_simulation_target.x = 10 * cos(_simulation_rotation)
+		_simulation_target.z = 10 * sin(_simulation_rotation)
 		var current_target_dist:float = Vector2(target_marker.position.x,target_marker.position.z).length()
-		target_marker.position.x = current_target_dist * cos(simulation_rotation)
-		target_marker.position.z = current_target_dist * sin(simulation_rotation)
+		target_marker.position.x = current_target_dist * cos(_simulation_rotation)
+		target_marker.position.z = current_target_dist * sin(_simulation_rotation)
 
 #region Leg configuration exports
 @export_group("Segment configuration")
@@ -81,7 +81,7 @@ var leg_offset:Vector3 = Vector3.ZERO:
 ## Distance of the resting position from the leg base.
 @export var rest_distance:float = 1
 ## Trajectory followed by the leg when returning to the resting position.
-@export var returning_trajectory:Curve
+@export var _returning_trajectory:Curve
 ## Specifies the elbow configuration (up or down).
 @export var elbow_up:bool = true
 ## Incidence angle of the third segment relative to the ground.
@@ -93,47 +93,47 @@ var leg_offset:Vector3 = Vector3.ZERO:
 @export_subgroup("Rotation second order")
 ## Configuration weights for rotation second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
-@export var rota_second_order_config:Dictionary:
+@export var _rota_second_order_config:Dictionary:
 	set(new_value):
-		rota_second_order_config = new_value
-		rota_second_order = SecondOrderSystem.new(rota_second_order_config)
+		_rota_second_order_config = new_value
+		_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
 ## Second order controller
-@export var rota_second_order:SecondOrderSystem
-var output_direction:Vector2
+@export var _rota_second_order:SecondOrderSystem
+var _output_direction:Vector2
 
 @export_subgroup("Extension second order")
 ## Configuration weights for extension second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
-@export var extension_second_order_config:Dictionary:
+@export var _extension_second_order_config:Dictionary:
 	set(new_value):
-		extension_second_order_config = new_value
-		extension_second_order = SecondOrderSystem.new(extension_second_order_config)
+		_extension_second_order_config = new_value
+		_extension_second_order = SecondOrderSystem.new(_extension_second_order_config)
 ## Second order controller
-@export var extension_second_order:SecondOrderSystem
+@export var _extension_second_order:SecondOrderSystem
 #endregion
 
 
 #region Marker exports
 @export_group("Markers")
 ## Displays markers at the beginning of each segment.
-@export var show_begin_segment_markers:bool = true
+@export var _show_begin_segment_markers:bool = true
 ## Defines the color of the markers at the beginning of each segment.
-@export_color_no_alpha var begin_markers_color:Color = Color.BLACK
+@export_color_no_alpha var _begin_markers_color:Color = Color.BLACK
 ## Displays markers at the end of each segment.
-@export var show_end_segment_markers:bool = true
+@export var _show_end_segment_markers:bool = true
 ## Defines the color of the markers at the end of each segment.
-@export_color_no_alpha var end_markers_color:Color = Color.RED
+@export_color_no_alpha var _end_markers_color:Color = Color.RED
 ## Display marker at the resting position.
-@export var show_rest_pos_marker:bool = true
+@export var _show_rest_pos_marker:bool = true
 ## Defines the color of the marker at the resting position.
-@export_color_no_alpha var rest_pos_marker_color:Color = Color.GREEN
+@export_color_no_alpha var _rest_pos_marker_color:Color = Color.GREEN
 ## Display marker at the targeted position.
-@export var show_target_pos_marker:bool = true
+@export var _show_target_pos_marker:bool = true
 ## Defines the color of the markers at the targeted position.
-@export_color_no_alpha var target_pos_marker_color:Color = Color.BLUE
-@export var show_path:bool = true
-var path_array:Array[Vector3]
-var path_mesh:MeshInstance3D
+@export_color_no_alpha var _target_pos_marker_color:Color = Color.BLUE
+@export var _show_path:bool = true
+var _path_array:Array[Vector3]
+var _path_mesh:MeshInstance3D
 #endregion
 
 
@@ -141,9 +141,9 @@ var path_mesh:MeshInstance3D
 ##desired height of body
 var leg_height:float
 ## target for segmetns 1 and 2 for IK
-var output_intermediate_target:Vector2
+var _output_intermediate_target:Vector2
 ##last position at max extension (use for returning path)
-var last_extended_position:Vector3 = Vector3.ZERO
+var _last_extended_position:Vector3 = Vector3.ZERO
 ## resting position
 var rest_pos:Vector3
 ## dictionnary of format {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
@@ -154,10 +154,10 @@ var is_returning:bool = true:
 		if new_value and not is_returning:
 			var next_extended_position:Vector3 = to_local(segment_3.segment_end.global_position)
 			if abs(next_extended_position) - abs(rest_pos) > Vector3.ZERO:
-				last_extended_position = next_extended_position
+				_last_extended_position = next_extended_position
 		is_returning = new_value
-		if is_returning: target_pos_marker_color = Color.YELLOW
-		else: target_pos_marker_color = Color.BLUE
+		if is_returning: _target_pos_marker_color = Color.YELLOW
+		else: _target_pos_marker_color = Color.BLUE
 ## movement direction of the body
 var movement_dir:Vector3
 ## used for more precise gait rules
@@ -174,17 +174,17 @@ var segment_1: LegSegment
 var segment_2: LegSegment
 var segment_3: LegSegment
 var target_marker: Marker3D
-var marker_childs:Array[Node3D] #can't delete all childs so keep count
+var _marker_childs:Array[Node3D] #can't delete all childs so keep count
 
 
 #region Setup
 ## initiate leg for game runtime
 func _ready() -> void:
 	_get_nodes()
-	output_intermediate_target = Vector2.ZERO
-	output_direction = Vector2.ZERO
-	rota_second_order = SecondOrderSystem.new(rota_second_order_config)
-	extension_second_order = SecondOrderSystem.new(extension_second_order_config)
+	_output_intermediate_target = Vector2.ZERO
+	_output_direction = Vector2.ZERO
+	_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
+	_extension_second_order = SecondOrderSystem.new(_extension_second_order_config)
 
 func _get_nodes() -> void:
 	base = $Base
@@ -196,16 +196,16 @@ func _get_nodes() -> void:
 ## intiate leg for editor runtime
 func _initate_editor() -> void:
 	_get_nodes()
-	update_segment_lengths()
-	output_intermediate_target = Vector2.ZERO
-	output_direction = Vector2.ZERO
-	rota_second_order = SecondOrderSystem.new(rota_second_order_config)
-	extension_second_order = SecondOrderSystem.new(extension_second_order_config)
-	path_mesh = MeshInstance3D.new()
-	add_child(path_mesh)
+	_update_segment_lengths()
+	_output_intermediate_target = Vector2.ZERO
+	_output_direction = Vector2.ZERO
+	_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
+	_extension_second_order = SecondOrderSystem.new(_extension_second_order_config)
+	_path_mesh = MeshInstance3D.new()
+	add_child(_path_mesh)
 
 
-func update_segment_lengths() -> void:
+func _update_segment_lengths() -> void:
 	base_length = base_length
 	leg_horizontal_offset = leg_horizontal_offset
 	leg_vertical_offset = leg_vertical_offset
@@ -217,16 +217,16 @@ func update_segment_lengths() -> void:
 func _set_markers() -> void:
 	var segments:Array = [segment_1,segment_2,segment_3]
 	for segment:LegSegment in segments:
-		segment.show_begin_marker = show_begin_segment_markers
-		segment.show_end_marker = show_end_segment_markers
-		segment.begin_marker_color = begin_markers_color
-		segment.end_marker_color = end_markers_color
+		segment.show_begin_marker = _show_begin_segment_markers
+		segment.show_end_marker = _show_end_segment_markers
+		segment.begin_marker_color = _begin_markers_color
+		segment.end_marker_color = _end_markers_color
 		segment.update()
-	if show_rest_pos_marker:
-		var marker:Node3D = _add_marker(rest_pos_marker_color)
+	if _show_rest_pos_marker:
+		var marker:Node3D = _add_marker(_rest_pos_marker_color)
 		marker.position = rest_pos
-	if show_target_pos_marker:
-		var marker:Node3D = _add_marker(target_pos_marker_color)
+	if _show_target_pos_marker:
+		var marker:Node3D = _add_marker(_target_pos_marker_color)
 		marker.position = target_marker.position
 
 func _add_marker(color:Color) -> Node3D:
@@ -236,60 +236,60 @@ func _add_marker(color:Color) -> Node3D:
 	for mesh:MeshInstance3D in marker.get_children():
 		mesh.set_surface_override_material(0,material)
 	add_child(marker)
-	marker_childs.append(marker)
+	_marker_childs.append(marker)
 	return marker
 #endregion
 
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
-		for child:Node in marker_childs:
+		for child:Node in _marker_childs:
 			child.queue_free()
-		marker_childs.clear()
-		if not path_mesh:
+		_marker_childs.clear()
+		if not _path_mesh:
 			_initate_editor()
-	move_leg(delta)
+	_move_leg(delta)
 
 
 #region Move to target
-func move_leg(delta:float) -> void:
+func _move_leg(delta:float) -> void:
 	rest_pos = get_rest_pos()
 	desired_state = DesiredState.OK_ON_GROUND
 	if Engine.is_editor_hint():
 		_set_markers()
-		if walk_simulation:
-			target_marker.global_position = emulate_target_position(delta)
-		if show_path:
-			path_array.append(to_local(segment_3.segment_end.global_position))
-	IK_variables =  get_IK_variables(target_marker.global_position)
-	rotate_base(delta)
-	extend_leg(delta)
-	update_returning_status()
+		if _walk_simulation:
+			target_marker.global_position = _emulate_target_position(delta)
+		if _show_path:
+			_path_array.append(to_local(segment_3.segment_end.global_position))
+	IK_variables =  _get_IK_variables(target_marker.global_position)
+	_rotate_base(delta)
+	_extend_leg(delta)
+	_update_returning_status()
 
 ## rotate leg towards target
-func rotate_base(delta:float) -> void:
+func _rotate_base(delta:float) -> void:
 	if is_returning:
 		@warning_ignore("unsafe_call_argument")
-		output_direction = rota_second_order.vec2_second_order_response(
-				delta,IK_variables["direction"],output_direction)["output"]
-		base.rotation.y = - output_direction.angle() + PI/2
+		_output_direction = _rota_second_order.vec2_second_order_response(
+				delta,IK_variables["direction"],_output_direction)["output"]
+		base.rotation.y = - _output_direction.angle() + PI/2
 	else:
 		@warning_ignore("unsafe_method_access")
 		base.rotation.y = - IK_variables["direction"].angle() + PI/2
-		output_direction = IK_variables["direction"]
+		_output_direction = IK_variables["direction"]
 	if base.rotation.y > 1 or base.rotation.y < -1:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 
 ## extend leg to target (in a plane)
-func extend_leg(delta:float) -> void:
+func _extend_leg(delta:float) -> void:
 	if is_returning:
 		@warning_ignore("unsafe_call_argument")
-		output_intermediate_target = extension_second_order.vec2_second_order_response(
-				delta,IK_variables["intermediate_tg"],output_intermediate_target)["output"]
+		_output_intermediate_target = _extension_second_order.vec2_second_order_response(
+				delta,IK_variables["intermediate_tg"],_output_intermediate_target)["output"]
 	else:
-		output_intermediate_target = IK_variables["intermediate_tg"]
-	var middle_angle:float = get_middle_angle(segment_1.segment_length,segment_2.segment_length,output_intermediate_target)
-	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,output_intermediate_target)
+		_output_intermediate_target = IK_variables["intermediate_tg"]
+	var middle_angle:float = _get_middle_angle(segment_1.segment_length,segment_2.segment_length,_output_intermediate_target)
+	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,_output_intermediate_target)
 	segment_3.rotation.x = incidence_angle - middle_angle - base_angle
 	segment_2.rotation.x = middle_angle
 	segment_1.rotation.x = base_angle
@@ -300,7 +300,7 @@ func extend_leg(delta:float) -> void:
 		desired_state = DesiredState.NEEDS_RESTEP
 
 ## get angle of second segment
-func get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
+func _get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
 	var a:float = 2*PI
 	var b:float = -1
 	if elbow_up:
@@ -319,15 +319,15 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 
 
 #region Update leg returning state
-func update_returning_status() -> void:
+func _update_returning_status() -> void:
 	if is_returning:
-		var max_horizontal_length:float = get_max_horizontal_length()
-		var current_horizontal_length:float = get_horizontal_length()
+		var max_horizontal_length:float = _get_max_horizontal_length()
+		var current_horizontal_length:float = _get_horizontal_length()
 		var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
-		update_returning_phase(length_ratio)
-		check_dist_to_rest()
+		_update_returning_phase(length_ratio)
+		_check_dist_to_rest()
 
-func update_returning_phase(length_ratio:float) -> void:
+func _update_returning_phase(length_ratio:float) -> void:
 	if length_ratio <.1:
 		returning_phase = ReturningPhase.LIFTING
 	elif length_ratio <.85:
@@ -335,32 +335,32 @@ func update_returning_phase(length_ratio:float) -> void:
 	else:
 		returning_phase = ReturningPhase.BACK_SWING
 
-func check_dist_to_rest() -> void:
+func _check_dist_to_rest() -> void:
 	var end_pos:Vector3 = to_local(segment_3.segment_end.global_position)
 	var dist_to_rest:float = end_pos.distance_squared_to(rest_pos)
 	if dist_to_rest < .0001: # is_equal_approx to sensible
 		is_returning = false
 		@warning_ignore("return_value_discarded")
-		draw_multi_line(path_array,path_mesh) # path array empty on game runtime
-		path_array.clear()
+		_draw_multi_line(_path_array,_path_mesh) # path array empty on game runtime
+		_path_array.clear()
 #endregion
 
 
 #region Editor walk simulation
-func emulate_target_position(delta:float) -> Vector3:
+func _emulate_target_position(delta:float) -> Vector3:
 	var target_pos:Vector3 = target_marker.position
 	if is_returning:
 		target_pos = get_returning_position(delta,target_pos)
 	else:
-		var dir:Vector3 = target_pos.direction_to(simulation_target+Vector3(0,rest_pos.y,0))
+		var dir:Vector3 = target_pos.direction_to(_simulation_target+Vector3(0,rest_pos.y,0))
 		target_pos =  target_pos + dir * delta * extension_speed
-		check_end_ground_phase()
+		_check_end_ground_phase()
 	return to_global(target_pos)
 
 ## update is_returning
-func check_end_ground_phase() -> void:
+func _check_end_ground_phase() -> void:
 	@warning_ignore("unsafe_call_argument")
-	var intermediate_target3D:Vector3 =  get_intermediate_target3D(
+	var intermediate_target3D:Vector3 =  _get_intermediate_target3D(
 				IK_variables["top_down_tg"],IK_variables["intermediate_tg"])
 	var start_pos:Vector3 = ( to_local(segment_1.global_position) -
 			leg_offset.rotated(Vector3.UP,base.rotation.y) )
@@ -377,7 +377,7 @@ func check_end_ground_phase() -> void:
 		is_returning = true
 
 ## draw trajectory (used for walk simulation path)
-func draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> MeshInstance3D:
+func _draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> MeshInstance3D:
 	if not line_points.size() > 0:
 		return old_mesh
 	var immediate_mesh:ImmediateMesh = ImmediateMesh.new()
@@ -436,32 +436,32 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 		target_pos2D = rest_pos2D
 	else: target_pos2D += move_effect
 
-	target_pos = Vector3(target_pos2D.x,get_returning_height(),target_pos2D.y)
+	target_pos = Vector3(target_pos2D.x,_get_returning_height(),target_pos2D.y)
 	return target_pos
 
 ## get target height of returning legs
-func get_returning_height() -> float:
-	var max_horizontal_length:float = get_max_horizontal_length()
-	var current_horizontal_length:float = get_horizontal_length()
+func _get_returning_height() -> float:
+	var max_horizontal_length:float = _get_max_horizontal_length()
+	var current_horizontal_length:float = _get_horizontal_length()
 	var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
-	var estimate_height:float = lerp(last_extended_position.y,rest_pos.y,length_ratio)
-	var additional_height:float = returning_trajectory.sample(length_ratio)
+	var estimate_height:float = lerp(_last_extended_position.y,rest_pos.y,length_ratio)
+	var additional_height:float = _returning_trajectory.sample(length_ratio)
 	additional_height = additional_height * max_horizontal_length
 	return estimate_height + additional_height
 
 ## get leg horizontal length on last max extended position
-func get_max_horizontal_length() -> float:
-	return Vector2(last_extended_position.x,last_extended_position.z).distance_to(
+func _get_max_horizontal_length() -> float:
+	return Vector2(_last_extended_position.x,_last_extended_position.z).distance_to(
 		Vector2(rest_pos.x,rest_pos.z))
 
 ## get current horitontal length
-func get_horizontal_length() -> float:
+func _get_horizontal_length() -> float:
 	var dist:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)-(
 		Vector2(rest_pos.x,rest_pos.z))
 	return dist.length()
 
 ## process intermediate variable used for IK
-func get_IK_variables(target:Vector3) -> Dictionary:
+func _get_IK_variables(target:Vector3) -> Dictionary:
 	target = to_local(target)
 	var start_pos:Vector3 = to_local(base.global_position)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z)
@@ -478,17 +478,17 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
 
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
-	var intermediate_tg:Vector2 = get_intermediate_target(segment_3.segment_length,side_view_tg)
+	var intermediate_tg:Vector2 = _get_intermediate_target(segment_3.segment_length,side_view_tg)
 	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
 
 ## get target used for segment 1 and 2 (in side view plane)
-func get_intermediate_target(L3:float, plane_target:Vector2) -> Vector2:
+func _get_intermediate_target(L3:float, plane_target:Vector2) -> Vector2:
 	plane_target.x -= L3 * cos(incidence_angle)
 	plane_target.y -= L3 * sin(incidence_angle)
 	return plane_target
 
 ## get target used for segment 1 and 2 (in 3D)
-func get_intermediate_target3D(top_down_target:Vector2,intermediate_tg:Vector2) -> Vector3:
+func _get_intermediate_target3D(top_down_target:Vector2,intermediate_tg:Vector2) -> Vector3:
 	var intermediate_top_down:Vector2 = top_down_target.normalized()*intermediate_tg.x
 	return Vector3(intermediate_top_down.x,
 			 -intermediate_tg.y, intermediate_top_down.y)
