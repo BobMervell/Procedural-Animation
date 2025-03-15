@@ -91,7 +91,7 @@ func _physics_process(delta: float) -> void:
 	move_body(delta)
 	update_body_height()
 	rotate_body(delta)
-	tilt_body(delta)
+	tilt_body()
 	old_body_pos = global_position
 
 #region Body movements
@@ -99,6 +99,7 @@ func move_body(delta:float) -> void:
 	body.velocity = move_second_order.vec3_second_order_response(
 			delta,body_velocity,body.velocity)["output"]
 	body.velocity.y = 0
+	@warning_ignore("return_value_discarded")
 	body.move_and_slide()
 
 func rotate_body(delta:float) -> void:
@@ -121,17 +122,17 @@ func update_body_height() -> void:
 		global_position.y = lerp(body.global_position.y,result["position"].y + body_desired_height,.1)
 		body.global_position.y = global_position.y
 
-func tilt_body(delta:float) -> void:
-	var front_height = (leg_heights[front_left_leg] + leg_heights[front_right_leg])*.5
-	var hind_height = (leg_heights[hind_left_leg] + leg_heights[hind_right_leg])*.5
-	var left_height = (leg_heights[front_left_leg] + leg_heights[hind_left_leg])*.5
-	var right_height = (leg_heights[front_right_leg] + leg_heights[hind_right_leg])*.5
-	var x_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
+func tilt_body() -> void:
+	var front_height:float = (leg_heights[front_left_leg] + leg_heights[front_right_leg])*.5
+	var hind_height:float = (leg_heights[hind_left_leg] + leg_heights[hind_right_leg])*.5
+	var left_height:float = (leg_heights[front_left_leg] + leg_heights[hind_left_leg])*.5
+	var right_height:float = (leg_heights[front_right_leg] + leg_heights[hind_right_leg])*.5
+	var x_size:float = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
 		front_right_leg.to_global(front_right_leg.rest_pos))
-	var z_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
+	var z_size:float = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
 		hind_left_leg.to_global(hind_left_leg.rest_pos))
-	var x_angle = asin((hind_height - front_height)/z_size)
-	var z_angle = asin((left_height - right_height)/x_size)
+	var x_angle:float = asin((hind_height - front_height)/z_size)
+	var z_angle:float = asin((left_height - right_height)/x_size)
 
 	rotation.x = x_angle
 	rotation.z = z_angle
@@ -139,19 +140,20 @@ func tilt_body(delta:float) -> void:
 	body.rotation.z = lerp(body.rotation.z,rotation.z,.1)
 #endregion
 
-func get_leg_heights():
+func get_leg_heights() -> void:
 	for leg:ThreeSegmentLeg in leg_heights:
 		if not leg.is_returning:
 			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
 
 func update_legs_variables(delta:float) -> void:
-	var movement_dir = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
-	for leg in get_returning_pair():
+	var movement_dir:Vector3 = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
+	for leg:ThreeSegmentLeg in get_returning_pair():
 		returning_legs.append(leg)
 
 	for leg:ThreeSegmentLeg in grounded_legs:
 		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
 		leg.is_returning = false
+		@warning_ignore("unsafe_call_argument")
 		leg.target_marker.position = leg.to_local(grounded_target_pos[leg])
 	for leg:ThreeSegmentLeg in returning_legs:
 		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
