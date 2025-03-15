@@ -2,39 +2,58 @@
 extends Node3D
 class_name RadialQuadripedController
 
+## front left leg node
 @export var front_left_leg:ThreeSegmentLeg
+## front right leg node
 @export var front_right_leg:ThreeSegmentLeg
+## hind right leg node
 @export var hind_right_leg:ThreeSegmentLeg
+## hind left leg node
 @export var hind_left_leg:ThreeSegmentLeg
+## main body node
 @export var body:CharacterBody3D
-
-## height of legs base
 @export var body_desired_height:float = 4
 
 @export_group("Move second order")
+## Configuration weights for move second order controller.
+## [br]See [b]SecondOrderSystem[/b] documentation
 @export var move_second_order_config:Dictionary:
 	set(new_value):
 		move_second_order_config = new_value
 		move_second_order = SecondOrderSystem.new(move_second_order_config)
+## Second order controller
 @export var move_second_order:SecondOrderSystem
 
 @export_group("Rotate second order")
+## Configuration weights for rotation second order controller.
+## [br]See [b]SecondOrderSystem[/b] documentation
 @export var rotation_second_order_config:Dictionary:
 	set(new_value):
 		rotation_second_order_config = new_value
 		rotation_second_order = SecondOrderSystem.new(rotation_second_order_config)
+## Second order controller
 @export var rotation_second_order:SecondOrderSystem
 
-
+## positions of legs end on ground
 var grounded_target_pos:Dictionary
+## list of legs on ground
 var grounded_legs:Array[ThreeSegmentLeg]
+## list of legs returning to resting position
 var returning_legs:Array[ThreeSegmentLeg]
+## list of first diagonal legs
 var diagonal_legs_1:Array[ThreeSegmentLeg]
+## list of second diagonal legs
 var diagonal_legs_2:Array[ThreeSegmentLeg]
 
+## heights of each leg (uneven or inclined terrain)
 var leg_heights:Dictionary
+## last body position
 var old_body_pos:Vector3
+## Main body velocity.
+## [br][b][color=red]Warning:[/color][/b] Use this instead of CharacterBody3D.velocity to control character
 var body_velocity:Vector3
+## Main body rotation.
+## [br][b][color=red]Warning:[/color][/b] Use this instead of Node3D.rotation to control character
 var body_rotation:Vector3
 
 #region Setup

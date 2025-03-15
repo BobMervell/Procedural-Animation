@@ -34,7 +34,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.80738, 0.0134124, 0.589616, 0.185381, 0.943138, -0.275332, -0.559842, 0.331644, 0.759149, 0, 1.4921, 8.35232)
+transform = Transform3D(0.801681, 0.0101868, 0.597407, 0.156437, 0.961236, -0.226343, -0.576617, 0.274947, 0.769178, 0, 1.49212, 8.35224)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -130,7 +130,7 @@ transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.93
 fov = 90.0
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order")]
-transform = Transform3D(0.807434, 0.0134132, 0.589669, 0.185393, 0.943196, -0.275356, -0.559879, 0.331665, 0.759217, 0, 1.4921, 8.35224)
+transform = Transform3D(0.801734, 0.0101873, 0.59746, 0.156447, 0.961297, -0.226363, -0.576656, 0.274964, 0.769247, 0, 1.49212, 8.35224)
 script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
