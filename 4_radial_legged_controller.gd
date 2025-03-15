@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+class_name RadialQuadripedController
 
 @export var front_left_leg:ThreeSegmentLeg
 @export var front_right_leg:ThreeSegmentLeg
@@ -77,8 +78,9 @@ func _initiate_editor() -> void:
 		grounded_target_pos[leg] = leg.to_global(leg.get_rest_pos())
 		leg_heights[leg] = 0
 
+
 func _physics_process(delta: float) -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() or true:
 		if ( not grounded_target_pos or (
 				grounded_target_pos[front_left_leg] == Vector3.ZERO
 				) ):
@@ -89,16 +91,15 @@ func _physics_process(delta: float) -> void:
 			get_leg_heights()
 			move_body(delta)
 			update_body_height()
-			body.rotation.y = get_second_order_angle(delta,body.rotation.y,body_rotation.y)
+			rotate_body(delta)
 			tilt_body(delta)
 			old_body_pos = global_position
 
 func update_body_state(delta:float):
 	if Engine.is_editor_hint():
+		body_rotation = rotation
 		body_velocity = (global_position - old_body_pos)/delta
-		
-	else: pass
-	body_rotation = rotation
+
 
 func move_body(delta:float) -> void:
 	body.velocity = move_second_order.vec3_second_order_response(
@@ -145,25 +146,19 @@ func update_tilt() -> void:
 
 func tilt_body(delta:float) -> void:
 	update_tilt()
-	#print(leg_heights)
-	#print(rad_to_deg(rotation.x))
-	body.rotation.x = lerp(body.rotation.x,rotation.x,.01)
-	body.rotation.z = lerp(body.rotation.z,rotation.z,.01)
-	#body.rotation.z = rotation.z
-	#body.rotation.x = get_second_order_angle(delta,body.rotation.x,body_rotation.x)
-	#body.rotation.z = get_second_order_angle(delta,body.rotation.z,body_rotation.z)
+	body.rotation.x = lerp(body.rotation.x,rotation.x,.1)
+	body.rotation.z = lerp(body.rotation.z,rotation.z,.1)
 
-func get_second_order_angle(delta:float,current_angle,new_angle) -> float:
-	var desired_direction:Vector2 = Vector2.from_angle(new_angle)
-	var real_direction:Vector2 = Vector2.from_angle(current_angle)
+func rotate_body(delta:float) -> void:
+	var desired_direction:Vector2 = Vector2.from_angle(body_rotation.y)
+	var real_direction:Vector2 = Vector2.from_angle(body.rotation.y)
 	real_direction = rotation_second_order.vec2_second_order_response(
 			delta,desired_direction,real_direction)["output"]
-	return real_direction.angle()
+	body.rotation.y = real_direction.angle()
 
 func update_legs(delta:float) -> void:
 	returning_legs_selected = false
-	var movement_dir = old_body_pos.direction_to(global_position)
-	movement_dir = Vector3(movement_dir.x,0,movement_dir.z).normalized()#discard y movement
+	var movement_dir = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
 	for leg in get_returning_pair():
 		returning_legs.append(leg)
 	

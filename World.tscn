@@ -1,7 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://h0dto0xiarh4"]
+[gd_scene load_steps=9 format=3 uid="uid://h0dto0xiarh4"]
 
+[ext_resource type="Script" path="res://player_controller.gd" id="2_k1kkn"]
 [ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://leg.tscn" id="2_o1g6v"]
-[ext_resource type="Script" path="res://4_radial_legged_controller.gd" id="3_fwq8x"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fidmb"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_h10oe"]
+sky_material = SubResource("ProceduralSkyMaterial_fidmb")
+
+[sub_resource type="Environment" id="Environment_emocc"]
+background_mode = 2
+sky = SubResource("Sky_h10oe")
+tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ikg7"]
 albedo_color = Color(0.145098, 0, 0, 1)
@@ -14,9 +26,15 @@ albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
 
 [node name="World" type="Node3D"]
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_emocc")
+
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.171487, -0.000489482, 0.985099, 0.336888, 0.939588, -0.0581778, -0.925713, 0.341847, 0.161316, 10.8698, 11.3326, -18.6843)
-velocity = Vector3(0, 0, -1.4013e-45)
+transform = Transform3D(0.923233, 0.00841926, 0.383618, 0.120181, 0.942937, -0.309988, -0.364363, 0.332351, 0.869774, -1.06737e-05, 4.53207, 5.39993e-05)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -55,7 +73,6 @@ size = Vector3(2.7, 0.488, 2.7)
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 1.25, -1.5, 1.25)
 leg_horizontal_offset = 0.5
 extension_speed = 20.0
-move_direction_impact = 1.2
 rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
@@ -70,7 +87,6 @@ show_path = false
 transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -1.25, -1.5, 1.25)
 leg_horizontal_offset = 0.5
 extension_speed = 20.0
-move_direction_impact = 1.2
 rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
@@ -85,7 +101,6 @@ show_path = false
 transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -1.25, -1.5, -1.25)
 leg_horizontal_offset = 0.5
 extension_speed = 20.0
-move_direction_impact = 1.2
 rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
@@ -100,7 +115,6 @@ show_path = false
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 1.25, -1.5, -1.25)
 leg_horizontal_offset = 0.5
 extension_speed = 20.0
-move_direction_impact = 1.2
 rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
@@ -111,9 +125,13 @@ extension_second_order_config = {
 extension_second_order = NodePath("")
 show_path = false
 
+[node name="Camera3D" type="Camera3D" parent="Robot"]
+transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.939898, 0, 10, 20)
+fov = 90.0
+
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order")]
-transform = Transform3D(0.171487, -0.0004913, 0.985067, 0.33689, 0.939574, -0.0581744, -0.925712, 0.341844, 0.161311, 10.8698, 11.3326, -18.6837)
-script = ExtResource("3_fwq8x")
+transform = Transform3D(0.923334, 0.00842008, 0.383659, 0.120195, 0.943042, -0.310022, -0.364404, 0.332387, 0.869867, 0, 4.53207, 0)
+script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
 hind_right_leg = NodePath("../Robot/LegHR")
@@ -140,13 +158,13 @@ tilt_second_order_config = {
 "z": 0.0
 }
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Ground" type="Area3D" parent="."]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0)
 shape = SubResource("BoxShape3D_ba2c8")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="Area3D"]
+[node name="CSGBox3D" type="CSGBox3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_d0tfp")
 size = Vector3(100, 1, 100)

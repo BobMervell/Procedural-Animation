@@ -7,28 +7,25 @@
 _data = [Vector2(0, 0), 0.0, 0.965331, 0, 0, Vector2(0.897858, 0.29814), 0.0, 0.0, 0, 0, Vector2(1, 0), -7.22192, 0.0, 0, 0]
 point_count = 3
 
-[node name="Leg" type="Node3D" node_paths=PackedStringArray("rota_second_order", "extension_second_order")]
+[node name="Leg" type="Node3D"]
 script = ExtResource("1_wim6m")
 leg_horizontal_offset = 0.25
 rest_distance = 2.0
 returning_trajectory = SubResource("Curve_7pm4l")
 incidence_angle = 1.57
 extension_speed = 2.0
-move_direction_impact = null
 rota_second_order_config = {
 "k": 1,
 "wo": 40,
 "xi": 1,
 "z": 0
 }
-rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
 "wo": 40.0,
 "xi": 1.0,
 "z": 0.0
 }
-extension_second_order = NodePath("")
 
 [node name="Base" parent="." instance=ExtResource("1_xjxfj")]
 segment_length = 0.5

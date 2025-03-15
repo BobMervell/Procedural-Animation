@@ -210,7 +210,7 @@ func _get_nodes() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() or true:
 		for child:Node in delete_childs:
 			child.queue_free()
 		delete_childs.clear()
@@ -233,8 +233,6 @@ func _physics_process(delta: float) -> void:
 			path_array.append(to_local(segment_3.segment_end.global_position))
 
 ### FOLLOW TARGET
-
-
 
 func get_IK_variables(target:Vector3) -> Dictionary:
 	target = to_local(target)
@@ -392,7 +390,7 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 
 func get_rest_pos() -> Vector3:
 	if is_returning: return rest_pos
-	
+
 	var rest_position = (Vector3(rest_distance,0,0) +
 			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
 	
