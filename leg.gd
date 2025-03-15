@@ -140,7 +140,7 @@ var IK_variables:Dictionary
 var is_returning:bool = true:
 	set(new_value):
 		if new_value and not is_returning:
-			var next_extended_position = to_local(segment_3.segment_end.global_position)
+			var next_extended_position:Vector3 = to_local(segment_3.segment_end.global_position)
 			if abs(next_extended_position) - abs(rest_pos) > Vector3.ZERO:
 				last_extended_position = next_extended_position
 		is_returning = new_value
@@ -150,10 +150,10 @@ var is_returning:bool = true:
 var movement_dir:Vector3
 ## used for more precise gait rules
 enum ReturningPhase {LIFTING,MID_SWING,BACK_SWING}
-var returning_phase = ReturningPhase.LIFTING
+var returning_phase:int = ReturningPhase.LIFTING
 ## used for more precise gait rules
 enum DesiredState {OK_ON_GROUND,NEEDS_RESTEP,MUST_RESTEP,RETURNING}
-var desired_state = DesiredState.OK_ON_GROUND
+var desired_state:int = DesiredState.OK_ON_GROUND
 #endregion
 
 ## leg's element
@@ -245,7 +245,7 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 	target = to_local(target)
 	var start_pos:Vector3 = to_local(base.global_position)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z)
-	var direction = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
+	var direction:Vector2 = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
 
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	top_down_tg = Vector2(target.x,target.z)
@@ -263,10 +263,12 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 
 func rotate_base(delta:float) -> void:
 	if is_returning:
+		@warning_ignore("unsafe_call_argument")
 		output_direction = rota_second_order.vec2_second_order_response(
 				delta,IK_variables["direction"],output_direction)["output"]
 		base.rotation.y = - output_direction.angle()
 	else:
+		@warning_ignore("unsafe_method_access")
 		base.rotation.y = - IK_variables["direction"].angle()
 		output_direction = IK_variables["direction"]
 	if base.rotation.y > 1 or base.rotation.y < -1:
@@ -274,6 +276,7 @@ func rotate_base(delta:float) -> void:
 
 func extend_arms(delta:float) -> void:
 	if is_returning:
+		@warning_ignore("unsafe_call_argument")
 		output_intermediate_target = extension_second_order.vec2_second_order_response(
 				delta,IK_variables["intermediate_tg"],output_intermediate_target)["output"]
 	else:
@@ -309,8 +312,8 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 #region Update leg state
 func update_returning_status() -> void:
 	if is_returning:
-		var max_horizontal_length = get_max_horizontal_length()
-		var current_horizontal_length = get_horizontal_length()
+		var max_horizontal_length:float = get_max_horizontal_length()
+		var current_horizontal_length:float = get_horizontal_length()
 		var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
 		update_returning_phase(length_ratio)
 		check_dist_to_rest()
@@ -328,6 +331,7 @@ func check_dist_to_rest() -> void:
 	var dist_to_rest:float = end_pos.distance_squared_to(rest_pos)
 	if dist_to_rest < .0001: # is_equal_approx to sensible
 		is_returning = false
+		@warning_ignore("return_value_discarded")
 		draw_multi_line(path_array,path_mesh)
 		path_array.clear()
 #endregion
@@ -337,16 +341,15 @@ func check_dist_to_rest() -> void:
 func emulate_target_position(delta:float) -> Vector3:
 	var target_pos:Vector3 = target_marker.position
 	if is_returning:
-		var a = target_pos
 		target_pos = get_returning_position(delta,target_pos)
 	else:
-		var a = target_pos
 		var dir:Vector3 = target_pos.direction_to(simulation_target+Vector3(0,rest_pos.y,0))
 		target_pos =  target_pos + dir * delta * extension_speed
 		check_end_ground_phase()
 	return to_global(target_pos)
 
 func check_end_ground_phase() -> void:
+	@warning_ignore("unsafe_call_argument")
 	var intermediate_target3D:Vector3 =  get_intermediate_target3D(
 				IK_variables["top_down_tg"],IK_variables["intermediate_tg"])
 	var start_pos:Vector3 = ( to_local(segment_1.global_position) -
@@ -366,15 +369,15 @@ func check_end_ground_phase() -> void:
 func draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> MeshInstance3D:
 	if not line_points.size() > 0:
 		return old_mesh
-	var immediate_mesh := ImmediateMesh.new()
-	var material := ORMMaterial3D.new()
+	var immediate_mesh:ImmediateMesh = ImmediateMesh.new()
+	var material:ORMMaterial3D = ORMMaterial3D.new()
 
 	old_mesh.mesh = immediate_mesh
 	old_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	immediate_mesh.surface_add_vertex(line_points[0])
-	for i in range(1,line_points.size()-1):
+	for i:int in range(1,line_points.size()-1):
 		immediate_mesh.surface_add_vertex(line_points[i])
 		immediate_mesh.surface_add_vertex(line_points[i])
 	immediate_mesh.surface_add_vertex(line_points[-1])
@@ -404,7 +407,7 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 
 func get_rest_pos() -> Vector3:
 	var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
-	var rest_position = (Vector3(rest_distance,0,0) + Vector3(offset.x,0,offset.z) +
+	var rest_position:Vector3 = (Vector3(rest_distance,0,0) + Vector3(offset.x,0,offset.z) +
 			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
 
 	if is_returning and rest_position.distance_squared_to(rest_pos)>1:
@@ -417,14 +420,15 @@ func get_rest_pos() -> Vector3:
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 
 	if not result.is_empty():
+		@warning_ignore("unsafe_call_argument")
 		rest_position = to_local(result["position"])
 	else:
 		rest_position.y = -leg_height - position.y
 	return rest_position
 
 func get_returning_height() -> float:
-	var max_horizontal_length = get_max_horizontal_length()
-	var current_horizontal_length = get_horizontal_length()
+	var max_horizontal_length:float = get_max_horizontal_length()
+	var current_horizontal_length:float = get_horizontal_length()
 	var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
 	var estimate_height:float = lerp(last_extended_position.y,rest_pos.y,length_ratio)
 	var additional_height:float = returning_trajectory.sample(length_ratio)
@@ -436,7 +440,7 @@ func get_max_horizontal_length() -> float:
 		Vector2(rest_pos.x,rest_pos.z))
 
 func get_horizontal_length() -> float:
-	var dist = Vector2(target_marker.position.x,target_marker.position.z)-(
+	var dist:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)-(
 		Vector2(rest_pos.x,rest_pos.z))
 	return dist.length()
 
