@@ -318,6 +318,7 @@ func _get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
 func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> float:
 	var x:float = target.x
 	var y:float = target.y
+	@warning_ignore("unsafe_call_argument")
 	return atan(y/x) - atan(L2*sin(middle_angle)/ max(.00001,(L1+L2*cos(middle_angle))) )
 #endregion
 
@@ -414,10 +415,10 @@ func get_rest_pos() -> Vector3:
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
 	var query_limit:Vector3 = rest_position + Vector3(0,-max_length,0)
 	rest_position = rest_position + Vector3(0,max_length/2,0)
-	#var test = _add_marker(Color.SPRING_GREEN)
-	#test.global_position = to_global(rest_position)
-	#var test2 = _add_marker(Color.SPRING_GREEN)
-	#test2.global_position = to_global(query_limit)
+	#var debug = _add_marker(Color.SPRING_GREEN)
+	#debug.global_position = to_global(rest_position)
+	#var debug2 = _add_marker(Color.SPRING_GREEN)
+	#debug2.global_position = to_global(query_limit)
 	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(rest_position),to_global(query_limit))
 	query.collide_with_areas = true
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
