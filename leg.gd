@@ -183,6 +183,7 @@ var _marker_childs:Array[Node3D] #can't delete all childs so keep count
 ## initiate leg for game runtime
 func _ready() -> void:
 	_get_nodes()
+	_update_segment_lengths()
 	_output_intermediate_target = Vector2.ZERO
 	_output_direction = Vector2.ZERO
 	_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
@@ -253,6 +254,7 @@ func _physics_process(delta: float) -> void:
 	_move_leg(delta)
 
 
+
 #region Move to target
 func _move_leg(delta:float) -> void:
 	rest_pos = get_rest_pos()
@@ -316,7 +318,7 @@ func _get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
 func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> float:
 	var x:float = target.x
 	var y:float = target.y
-	return atan(y/x) - atan(L2*sin(middle_angle)/ (L1+L2*cos(middle_angle)) )
+	return atan(y/x) - atan(L2*sin(middle_angle)/ max(.00001,(L1+L2*cos(middle_angle))) )
 #endregion
 
 
@@ -366,7 +368,6 @@ func _check_end_ground_phase() -> void:
 				IK_variables["top_down_tg"],IK_variables["intermediate_tg"])
 	var start_pos:Vector3 = ( to_local(segment_1.global_position) -
 			leg_offset.rotated(Vector3.UP,base.rotation.y) )
-
 	var target_diff:Vector3 = intermediate_target3D - start_pos
 	var max_diff:float = segment_1.segment_length + segment_2.segment_length
 	var dist_too_large:bool = target_diff.length() > max_diff
@@ -405,15 +406,18 @@ func _draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> Mes
 #region State variables getters
 ## get resting position
 func get_rest_pos() -> Vector3:
-	var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
-	var rest_position:Vector3 = (Vector3(rest_distance,0,0) + Vector3(offset.x,0,offset.z) +
-			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
-	if (not rest_pos ==Vector3.ZERO and (
-			is_returning and rest_position.distance_squared_to(rest_pos)>1 )):
-		return rest_pos
+	var base_offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y )
+	var dir_offset:Vector3 = (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y)
+	var rest_position:Vector3 = (Vector3(rest_distance,0,0)
+			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
 
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
 	var query_limit:Vector3 = rest_position + Vector3(0,-max_length,0)
+	rest_position = rest_position + Vector3(0,max_length/2,0)
+	#var test = _add_marker(Color.SPRING_GREEN)
+	#test.global_position = to_global(rest_position)
+	#var test2 = _add_marker(Color.SPRING_GREEN)
+	#test2.global_position = to_global(query_limit)
 	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(rest_position),to_global(query_limit))
 	query.collide_with_areas = true
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
