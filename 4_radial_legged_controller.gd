@@ -8,12 +8,6 @@ class_name RadialQuadripedController
 @export var hind_left_leg:ThreeSegmentLeg
 @export var body:CharacterBody3D
 
-var grounded_target_pos:Dictionary
-var grounded_legs:Array[ThreeSegmentLeg]
-var returning_legs:Array[ThreeSegmentLeg]
-var diagonal_legs_1:Array[ThreeSegmentLeg]
-var diagonal_legs_2:Array[ThreeSegmentLeg]
-var returning_legs_selected:bool = false
 ## height of legs base
 @export var body_desired_height:float = 4
 
@@ -31,38 +25,42 @@ var returning_legs_selected:bool = false
 		rotation_second_order = SecondOrderSystem.new(rotation_second_order_config)
 @export var rotation_second_order:SecondOrderSystem
 
-@export_group("Tilt second order")
-@export var tilt_second_order_config:Dictionary:
-	set(new_value):
-		tilt_second_order_config = new_value
-		tilt_x_second_order = SecondOrderSystem.new(tilt_second_order_config)
-		tilt_z_second_order = SecondOrderSystem.new(tilt_second_order_config)
-		height_second_order = SecondOrderSystem.new(tilt_second_order_config)
-@export var tilt_second_order:SecondOrderSystem
 
-var tilt_x_second_order:SecondOrderSystem
-var tilt_z_second_order:SecondOrderSystem
-var height_second_order:SecondOrderSystem
+var grounded_target_pos:Dictionary
+var grounded_legs:Array[ThreeSegmentLeg]
+var returning_legs:Array[ThreeSegmentLeg]
+var diagonal_legs_1:Array[ThreeSegmentLeg]
+var diagonal_legs_2:Array[ThreeSegmentLeg]
 
 var leg_heights:Dictionary
 var old_body_pos:Vector3
 var body_velocity:Vector3
 var body_rotation:Vector3
 
-func _initiate_editor() -> void:
+#region Setup
+func _ready() -> void:
+	_initiate_controller()
+
+func _initiate_controller() -> void:
+	_initiate_body()
+	_reset_legs_orientation()
+	_initiate_legs_dictionnaries()
+	for leg:ThreeSegmentLeg in grounded_legs:
+		_initiate_leg_variables(leg)
+
+func _initiate_body() -> void:
 	body.global_position = global_position
 	old_body_pos = global_position
 	move_second_order = SecondOrderSystem.new(move_second_order_config)
 	rotation_second_order = SecondOrderSystem.new(rotation_second_order_config)
-	tilt_x_second_order = SecondOrderSystem.new(tilt_second_order_config)
-	tilt_z_second_order = SecondOrderSystem.new(tilt_second_order_config)
-	height_second_order = SecondOrderSystem.new(tilt_second_order_config)
 
+func _reset_legs_orientation() -> void:
 	front_left_leg.rotation.y = -PI/4
 	front_right_leg.rotation.y = -3*PI/4
 	hind_right_leg.rotation.y = 3*PI/4
 	hind_left_leg.rotation.y = PI/4
 
+func _initiate_legs_dictionnaries() -> void:
 	grounded_legs.append(front_left_leg)
 	grounded_legs.append(front_right_leg)
 	grounded_legs.append(hind_right_leg)
@@ -71,46 +69,44 @@ func _initiate_editor() -> void:
 	diagonal_legs_1.append(hind_right_leg)
 	diagonal_legs_2.append(front_right_leg)
 	diagonal_legs_2.append(hind_left_leg)
-	for leg:ThreeSegmentLeg in grounded_legs:
-		leg.base.rotation.y = 0
-		leg.movement_dir = Vector3.ZERO
-		leg.leg_height = body_desired_height
-		grounded_target_pos[leg] = leg.to_global(leg.get_rest_pos())
-		leg_heights[leg] = 0
+
+func _initiate_leg_variables(leg:ThreeSegmentLeg) -> void:
+	leg.base.rotation.y = 0
+	leg.movement_dir = Vector3.ZERO
+	leg.leg_height = body_desired_height
+	grounded_target_pos[leg] = leg.to_global(leg.get_rest_pos())
+	leg_heights[leg] = 0
+#endregion
 
 
 func _physics_process(delta: float) -> void:
-	if Engine.is_editor_hint() or true:
-		if ( not grounded_target_pos or (
-				grounded_target_pos[front_left_leg] == Vector3.ZERO
-				) ):
-			call_deferred("_initiate_editor")
-		else:
-			update_body_state(delta)
-			update_legs(delta)
-			get_leg_heights()
-			move_body(delta)
-			update_body_height()
-			rotate_body(delta)
-			tilt_body(delta)
-			old_body_pos = global_position
-
-func update_body_state(delta:float):
 	if Engine.is_editor_hint():
-		body_rotation = rotation
-		body_velocity = (global_position - old_body_pos)/delta
+		if diagonal_legs_1.is_empty():
+			call_deferred("_initiate_controller")
+		else:
+			body_rotation = rotation
+			body_velocity = (global_position - old_body_pos)/delta
+	update_legs_variables(delta)
+	get_leg_heights()
+	move_body(delta)
+	update_body_height()
+	rotate_body(delta)
+	tilt_body(delta)
+	old_body_pos = global_position
 
-
+#region Body movements
 func move_body(delta:float) -> void:
 	body.velocity = move_second_order.vec3_second_order_response(
 			delta,body_velocity,body.velocity)["output"]
 	body.velocity.y = 0
 	body.move_and_slide()
 
-func get_leg_heights():
-	for leg:ThreeSegmentLeg in leg_heights:
-		if not leg.is_returning:
-			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
+func rotate_body(delta:float) -> void:
+	var desired_direction:Vector2 = Vector2.from_angle(body_rotation.y)
+	var real_direction:Vector2 = Vector2.from_angle(body.rotation.y)
+	real_direction = rotation_second_order.vec2_second_order_response(
+			delta,desired_direction,real_direction)["output"]
+	body.rotation.y = real_direction.angle()
 
 func update_body_height() -> void:
 	var max_length:float = (front_left_leg.segment_1.segment_length  +
@@ -125,7 +121,7 @@ func update_body_height() -> void:
 		global_position.y = lerp(body.global_position.y,result["position"].y + body_desired_height,.1)
 		body.global_position.y = global_position.y
 
-func update_tilt() -> void:
+func tilt_body(delta:float) -> void:
 	var front_height = (leg_heights[front_left_leg] + leg_heights[front_right_leg])*.5
 	var hind_height = (leg_heights[hind_left_leg] + leg_heights[hind_right_leg])*.5
 	var left_height = (leg_heights[front_left_leg] + leg_heights[hind_left_leg])*.5
@@ -134,30 +130,21 @@ func update_tilt() -> void:
 		front_right_leg.to_global(front_right_leg.rest_pos))
 	var z_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
 		hind_left_leg.to_global(hind_left_leg.rest_pos))
-
-
 	var x_angle = asin((hind_height - front_height)/z_size)
 	var z_angle = asin((left_height - right_height)/x_size)
-	#print(deg_to_rad(rotation.x-x_angle))
-	#print(front_height - hind_height)
-	#print(asin((1)))
+
 	rotation.x = x_angle
 	rotation.z = z_angle
-
-func tilt_body(delta:float) -> void:
-	update_tilt()
 	body.rotation.x = lerp(body.rotation.x,rotation.x,.1)
 	body.rotation.z = lerp(body.rotation.z,rotation.z,.1)
+#endregion
 
-func rotate_body(delta:float) -> void:
-	var desired_direction:Vector2 = Vector2.from_angle(body_rotation.y)
-	var real_direction:Vector2 = Vector2.from_angle(body.rotation.y)
-	real_direction = rotation_second_order.vec2_second_order_response(
-			delta,desired_direction,real_direction)["output"]
-	body.rotation.y = real_direction.angle()
+func get_leg_heights():
+	for leg:ThreeSegmentLeg in leg_heights:
+		if not leg.is_returning:
+			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
 
-func update_legs(delta:float) -> void:
-	returning_legs_selected = false
+func update_legs_variables(delta:float) -> void:
 	var movement_dir = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
 	for leg in get_returning_pair():
 		returning_legs.append(leg)

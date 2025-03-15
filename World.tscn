@@ -34,7 +34,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.805562, 0.0328498, 0.591336, 0.155973, 0.951286, -0.265352, -0.571305, 0.306032, 0.761362, 0, 5.61822, -2.98412)
+transform = Transform3D(0.80738, 0.0134124, 0.589616, 0.185381, 0.943138, -0.275332, -0.559842, 0.331644, 0.759149, 0, 1.4921, 8.35232)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -81,7 +81,6 @@ extension_second_order_config = {
 "z": 0.0
 }
 extension_second_order = NodePath("")
-target_pos_marker_color = Color(0, 0, 1, 1)
 show_path = false
 
 [node name="LegFR" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
@@ -96,7 +95,6 @@ extension_second_order_config = {
 "z": 0.0
 }
 extension_second_order = NodePath("")
-target_pos_marker_color = Color(0, 0, 1, 1)
 show_path = false
 
 [node name="LegHR" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
@@ -111,7 +109,6 @@ extension_second_order_config = {
 "z": 0.0
 }
 extension_second_order = NodePath("")
-target_pos_marker_color = Color(0, 0, 1, 1)
 show_path = false
 
 [node name="LegHL" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
@@ -126,7 +123,6 @@ extension_second_order_config = {
 "z": 0.0
 }
 extension_second_order = NodePath("")
-target_pos_marker_color = Color(0, 0, 1, 1)
 show_path = false
 
 [node name="Camera3D" type="Camera3D" parent="Robot"]
@@ -134,7 +130,7 @@ transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.93
 fov = 90.0
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order")]
-transform = Transform3D(0.805618, 0.0328516, 0.59139, 0.155984, 0.951346, -0.265376, -0.571344, 0.306051, 0.761431, 0, 5.61822, -2.98412)
+transform = Transform3D(0.807434, 0.0134132, 0.589669, 0.185393, 0.943196, -0.275356, -0.559879, 0.331665, 0.759217, 0, 1.4921, 8.35224)
 script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
@@ -155,12 +151,6 @@ rotation_second_order_config = {
 "z": 0.05
 }
 rotation_second_order = NodePath("")
-tilt_second_order_config = {
-"k": 1.0,
-"wo": 40.0,
-"xi": 1.0,
-"z": 0.0
-}
 
 [node name="Ground" type="Area3D" parent="."]
 
