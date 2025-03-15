@@ -30,6 +30,9 @@ var segment_begin:Node3D
 var _segment_shape:CSGBox3D
 var _delete_childs:Array[Node3D] #can't delete all childs so keep count
 
+func _ready() -> void:
+	update()
+
 func update() -> void:
 	for child:Node in _delete_childs:
 		child.queue_free()

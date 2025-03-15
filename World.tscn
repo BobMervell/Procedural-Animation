@@ -34,7 +34,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.801681, 0.0101868, 0.597407, 0.156437, 0.961236, -0.226343, -0.576617, 0.274947, 0.769178, 0, 1.49212, 8.35224)
+transform = Transform3D(-0.00076395, 0.150108, -0.988278, -0.15905, 0.975885, 0.148285, 0.987055, 0.157366, 0.0231291, 2.26025, 4.06939, 1.27126)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -69,68 +69,56 @@ height = 0.207148
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1441, 0)
 size = Vector3(2.7, 0.488, 2.7)
 
-[node name="LegFL" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegFL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 1.25, -1.5, 1.25)
-leg_horizontal_offset = 0.5
+leg_horizontal_offset = 0.3
+segment_1_length = 1.72
 extension_speed = 20.0
-rota_second_order = NodePath("")
-extension_second_order_config = {
-"k": 1.0,
-"wo": 100.0,
-"xi": 1.5,
-"z": 0.0
-}
-extension_second_order = NodePath("")
-show_path = false
+rotation_amplitude = 2.094
+_rota_second_order = NodePath("")
+_extension_second_order = NodePath("")
+_target_pos_marker_color = Color(1, 1, 0, 1)
+_show_path = false
 
-[node name="LegFR" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegFR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
 transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -1.25, -1.5, 1.25)
-leg_horizontal_offset = 0.5
+leg_horizontal_offset = 0.3
+segment_1_length = 1.72
 extension_speed = 20.0
-rota_second_order = NodePath("")
-extension_second_order_config = {
-"k": 1.0,
-"wo": 100.0,
-"xi": 1.5,
-"z": 0.0
-}
-extension_second_order = NodePath("")
-show_path = false
+rotation_amplitude = 2.094
+_rota_second_order = NodePath("")
+_extension_second_order = NodePath("")
+_target_pos_marker_color = Color(1, 1, 0, 1)
+_show_path = false
 
-[node name="LegHR" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegHR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
 transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -1.25, -1.5, -1.25)
-leg_horizontal_offset = 0.5
+leg_horizontal_offset = 0.3
+segment_1_length = 1.72
 extension_speed = 20.0
-rota_second_order = NodePath("")
-extension_second_order_config = {
-"k": 1.0,
-"wo": 100.0,
-"xi": 1.5,
-"z": 0.0
-}
-extension_second_order = NodePath("")
-show_path = false
+rotation_amplitude = 2.094
+_rota_second_order = NodePath("")
+_extension_second_order = NodePath("")
+_target_pos_marker_color = Color(1, 1, 0, 1)
+_show_path = false
 
-[node name="LegHL" parent="Robot" node_paths=PackedStringArray("rota_second_order", "extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegHL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 1.25, -1.5, -1.25)
-leg_horizontal_offset = 0.5
+leg_horizontal_offset = 0.3
+segment_1_length = 1.72
 extension_speed = 20.0
-rota_second_order = NodePath("")
-extension_second_order_config = {
-"k": 1.0,
-"wo": 100.0,
-"xi": 1.5,
-"z": 0.0
-}
-extension_second_order = NodePath("")
-show_path = false
+rotation_amplitude = 2.094
+_rota_second_order = NodePath("")
+_extension_second_order = NodePath("")
+_target_pos_marker_color = Color(1, 1, 0, 1)
+_show_path = false
 
 [node name="Camera3D" type="Camera3D" parent="Robot"]
 transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.939898, 0, 10, 20)
 fov = 90.0
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order")]
-transform = Transform3D(0.801734, 0.0101873, 0.59746, 0.156447, 0.961297, -0.226363, -0.576656, 0.274964, 0.769247, 0, 1.49212, 8.35224)
+transform = Transform3D(-0.000763933, 0.15011, -0.98833, -0.159051, 0.975898, 0.148293, 0.987062, 0.157368, 0.0231303, 2.26025, 4.06939, 1.27126)
 script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")

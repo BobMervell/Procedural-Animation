@@ -169,15 +169,13 @@ func update_legs_variables(delta:float) -> void:
 	var movement_dir:Vector3 = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
 	for leg:ThreeSegmentLeg in get_returning_pair():
 		returning_legs.append(leg)
-
+		leg.is_returning = true
 	for leg:ThreeSegmentLeg in grounded_legs:
 		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
-		leg.is_returning = false
 		@warning_ignore("unsafe_call_argument")
 		leg.target_marker.position = leg.to_local(grounded_target_pos[leg])
 	for leg:ThreeSegmentLeg in returning_legs:
 		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
-		leg.is_returning = true
 		return_to_rest(leg,delta)
 
 ## get leg pair which needs the most a restep

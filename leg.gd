@@ -88,8 +88,10 @@ var leg_offset:Vector3 = Vector3.ZERO:
 @export_range(0,PI,.01) var incidence_angle:float
 ## Controls the speed of leg's extension/retraction.
 @export var extension_speed:float = 10
+## body direction impact on rest positions
 @export var move_direction_impact:float = 1.2
-
+## leg rotation amplitude
+@export var rotation_amplitude:float = 2*PI/3
 @export_subgroup("Rotation second order")
 ## Configuration weights for rotation second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
@@ -149,7 +151,7 @@ var rest_pos:Vector3
 ## dictionnary of format {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
 var IK_variables:Dictionary
 ## true if leg is returning to resting position
-var is_returning:bool = true:
+var is_returning:bool = false:
 	set(new_value):
 		if new_value and not is_returning:
 			var next_extended_position:Vector3 = to_local(segment_3.segment_end.global_position)
@@ -277,7 +279,7 @@ func _rotate_base(delta:float) -> void:
 		@warning_ignore("unsafe_method_access")
 		base.rotation.y = - IK_variables["direction"].angle() + PI/2
 		_output_direction = IK_variables["direction"]
-	if base.rotation.y > 1 or base.rotation.y < -1:
+	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 
 ## extend leg to target (in a plane)
