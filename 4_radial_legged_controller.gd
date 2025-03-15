@@ -13,7 +13,7 @@ class_name RadialQuadripedController
 ## main body node
 @export var body:CharacterBody3D
 @export var body_desired_height:float = 4
-
+@export_range(0,1,.001) var tilt_speed:float = .3
 @export_group("Move second order")
 ## Configuration weights for move second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
@@ -155,13 +155,13 @@ func tilt_body() -> void:
 
 	rotation.x = x_angle
 	rotation.z = z_angle
-	body.rotation.x = lerp(body.rotation.x,rotation.x,.1)
-	body.rotation.z = lerp(body.rotation.z,rotation.z,.1)
+	body.rotation.x = lerp(body.rotation.x,rotation.x,tilt_speed)
+	body.rotation.z = lerp(body.rotation.z,rotation.z,tilt_speed)
 #endregion
 
 func get_leg_heights() -> void:
 	for leg:ThreeSegmentLeg in leg_heights:
-		if not leg.is_returning:
+		if leg.desired_state == leg.DesiredState.OK_ON_GROUND:
 			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
 
 ## update legs end position and returning state
