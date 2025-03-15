@@ -164,6 +164,7 @@ func get_leg_heights() -> void:
 		if not leg.is_returning:
 			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
 
+## update legs end position and returning state
 func update_legs_variables(delta:float) -> void:
 	var movement_dir:Vector3 = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
 	for leg:ThreeSegmentLeg in get_returning_pair():
@@ -179,6 +180,7 @@ func update_legs_variables(delta:float) -> void:
 		leg.is_returning = true
 		return_to_rest(leg,delta)
 
+## get leg pair which needs the most a restep
 func get_returning_pair() -> Array[ThreeSegmentLeg]:
 	# worst case check twice each legs (4*2 in total)
 	var anticipated_lift:bool = true
@@ -196,10 +198,11 @@ func get_returning_pair() -> Array[ThreeSegmentLeg]:
 			return diagonal_legs_2
 	return []
 
+## move leg target to resting_position
 func return_to_rest(leg:ThreeSegmentLeg,delta:float) -> void:
 	var leg_rest:Vector3 = leg.get_rest_pos()
 	if grounded_legs.has(leg): grounded_legs.erase(leg)
-	if leg.target_marker.position.distance_squared_to(leg_rest) < .0001:
+	if leg.target_marker.position.distance_squared_to(leg_rest) < .0001: # is_equal_approx to sensible
 		grounded_legs.append(leg)
 		returning_legs.erase(leg)
 		grounded_target_pos[leg] = leg.to_global(leg_rest)
