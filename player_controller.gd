@@ -13,7 +13,7 @@ func _physics_process(delta: float) -> void:
 			body_velocity.z = direction.z * SPEED
 		else:
 			body_velocity = Vector3.ZERO
-		
+
 		if Input.is_action_pressed("ui_accept"):
 			body_rotation.y += delta
 		if Input.is_action_pressed("ui_cancel"):

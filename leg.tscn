@@ -7,9 +7,8 @@
 _data = [Vector2(0, 0), 0.0, 0.965331, 0, 0, Vector2(0.897858, 0.29814), 0.0, 0.0, 0, 0, Vector2(1, 0), -7.22192, 0.0, 0, 0]
 point_count = 3
 
-[node name="Leg" type="Node3D"]
+[node name="Leg" type="Node3D" node_paths=PackedStringArray("rota_second_order", "extension_second_order")]
 script = ExtResource("1_wim6m")
-leg_horizontal_offset = 0.25
 rest_distance = 2.0
 returning_trajectory = SubResource("Curve_7pm4l")
 incidence_angle = 1.57
@@ -20,36 +19,39 @@ rota_second_order_config = {
 "xi": 1,
 "z": 0
 }
+rota_second_order = NodePath("")
 extension_second_order_config = {
 "k": 1.0,
 "wo": 40.0,
 "xi": 1.0,
 "z": 0.0
 }
+extension_second_order = NodePath("")
 
 [node name="Base" parent="." instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 segment_length = 0.5
 segment_width = 1.0
 segment_height = 0.3
 
 [node name="Segment_1" parent="Base" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(-4.37114e-08, -0.999977, 0.00675251, 0, 0.00675251, 0.999977, -1, 4.37104e-08, -2.95162e-10, 0.25, 0, 0)
+transform = Transform3D(-4.37114e-08, -0.997053, 0.0767176, 0, 0.0767176, 0.997053, -1, 4.35826e-08, -3.35343e-09, 0, 0, 0)
 segment_length = 2.0
 segment_width = 0.5
 segment_height = 0.3
 
 [node name="Segment_2" parent="Base/Segment_1" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(1, 0, 0, 0, -0.999908, -0.0134694, 0, 0.0134694, -0.999908, 0, 0, 2)
+transform = Transform3D(1, 0, 0, 0, -0.171985, -0.985098, 0, 0.985098, -0.171985, 0, 0, 2)
 segment_length = 2.0
 segment_width = 0.3
 segment_height = 0.5
 
 [node name="Segment_3" parent="Base/Segment_1/Segment_2" instance=ExtResource("1_xjxfj")]
-transform = Transform3D(1, 0, 0, 0, 0.999982, -0.00592091, 0, 0.00592091, 0.999982, 0, 0, 2)
+transform = Transform3D(1, 0, 0, 0, 0.247824, -0.968803, 0, 0.968803, 0.247824, 0, 0, 2)
 segment_length = 1.5
 segment_width = 0.5
 segment_height = 0.3
 
 [node name="Editor_target" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.221866, -1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.09263, 0, 0)
 gizmo_extents = 0.0

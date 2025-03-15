@@ -60,6 +60,6 @@ func add_segment_shape() -> void:
 
 func update_length() -> void:
 	segment_begin.position = Vector3.ZERO
-	segment_end.position.z = segment_length 
+	segment_end.position.z = segment_length
 	segment_shape.size.z = segment_length
-	segment_shape.position.z = segment_length/2 
+	segment_shape.position.z = segment_length/2

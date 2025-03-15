@@ -62,7 +62,7 @@ func _initiate_editor() -> void:
 	front_right_leg.rotation.y = -3*PI/4
 	hind_right_leg.rotation.y = 3*PI/4
 	hind_left_leg.rotation.y = PI/4
-	
+
 	grounded_legs.append(front_left_leg)
 	grounded_legs.append(front_right_leg)
 	grounded_legs.append(hind_right_leg)
@@ -113,7 +113,7 @@ func get_leg_heights():
 			leg_heights[leg] = leg.segment_3.segment_end.global_position.y
 
 func update_body_height() -> void:
-	var max_length:float = (front_left_leg.segment_1.segment_length  + 
+	var max_length:float = (front_left_leg.segment_1.segment_length  +
 			front_left_leg.segment_2.segment_length +
 			front_left_leg.segment_3.segment_length)
 	var query_start:Vector3 = body.global_position
@@ -134,8 +134,8 @@ func update_tilt() -> void:
 		front_right_leg.to_global(front_right_leg.rest_pos))
 	var z_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
 		hind_left_leg.to_global(hind_left_leg.rest_pos))
-	
-	
+
+
 	var x_angle = asin((hind_height - front_height)/z_size)
 	var z_angle = asin((left_height - right_height)/x_size)
 	#print(deg_to_rad(rotation.x-x_angle))
@@ -161,7 +161,7 @@ func update_legs(delta:float) -> void:
 	var movement_dir = Vector3(body_velocity.x,0,body_velocity.z).normalized()#discard y movement
 	for leg in get_returning_pair():
 		returning_legs.append(leg)
-	
+
 	for leg:ThreeSegmentLeg in grounded_legs:
 		if movement_dir != Vector3.ZERO: leg.movement_dir = movement_dir
 		leg.is_returning = false
@@ -175,7 +175,7 @@ func get_returning_pair() -> Array[ThreeSegmentLeg]:
 	# worst case check twice each legs (4*2 in total)
 	var anticipated_lift:bool = true
 	for leg:ThreeSegmentLeg in returning_legs:
-		anticipated_lift = ( anticipated_lift and 
+		anticipated_lift = ( anticipated_lift and
 				leg.returning_phase == leg.ReturningPhase.BACK_SWING)
 	if not anticipated_lift: return []
 	for leg:ThreeSegmentLeg in grounded_legs:
