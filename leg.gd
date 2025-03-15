@@ -391,8 +391,8 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 func get_rest_pos() -> Vector3:
 	if is_returning: return rest_pos
 	
-	var rest_position = (Vector3(rest_distance,0,0) -
-			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-rotation.y))
+	var rest_position = (Vector3(rest_distance,0,0) +
+			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
 	
 	#var diff = rest_position - rest_pos
 	#if  is_returning and diff.length_squared() > 1 : #don't update on return

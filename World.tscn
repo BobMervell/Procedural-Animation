@@ -15,8 +15,8 @@ albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
 [node name="World" type="Node3D"]
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(-0.985413, 0.0344371, -0.165806, -0.00388095, 0.974104, 0.225389, 0.169299, 0.222772, -0.959916, 5.69856, 14.7339, -28.0293)
-velocity = Vector3(1.4013e-45, 0, 2.8026e-45)
+transform = Transform3D(0.999827, 0.00545405, -3.11111e-07, -0.00511725, 0.938032, -0.346017, -0.00188719, 0.345998, 0.938083, 13.6228, 13.8494, -25.5991)
+velocity = Vector3(-5.146e-34, 0, -2.8026e-45)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -112,7 +112,7 @@ extension_second_order = NodePath("")
 show_path = false
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "move_second_order", "rotation_second_order")]
-transform = Transform3D(-0.985396, 0.0344376, -0.165803, -0.00388088, 0.974122, 0.225384, 0.169296, 0.222776, -0.959896, 5.6985, 14.7339, -28.029)
+transform = Transform3D(0.999819, 0.00545407, -3.111e-07, -0.00511728, 0.938022, -0.346011, -0.0018872, 0.345994, 0.938067, 13.6228, 13.8494, -25.5986)
 script = ExtResource("3_fwq8x")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
