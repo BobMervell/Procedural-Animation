@@ -125,10 +125,10 @@ func update_body_height() -> void:
 		body.global_position.y = global_position.y
 
 func update_tilt() -> void:
-	var front_height = max(leg_heights[front_left_leg],leg_heights[front_right_leg])
-	var hind_height = max(leg_heights[hind_left_leg],leg_heights[hind_right_leg])
-	var left_height = max(leg_heights[front_left_leg],leg_heights[hind_left_leg])
-	var right_height = max(leg_heights[front_right_leg],leg_heights[hind_right_leg])
+	var front_height = (leg_heights[front_left_leg] + leg_heights[front_right_leg])*.5
+	var hind_height = (leg_heights[hind_left_leg] + leg_heights[hind_right_leg])*.5
+	var left_height = (leg_heights[front_left_leg] + leg_heights[hind_left_leg])*.5
+	var right_height = (leg_heights[front_right_leg] + leg_heights[hind_right_leg])*.5
 	var x_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
 		front_right_leg.to_global(front_right_leg.rest_pos))
 	var z_size = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
@@ -147,8 +147,8 @@ func tilt_body(delta:float) -> void:
 	update_tilt()
 	#print(leg_heights)
 	#print(rad_to_deg(rotation.x))
-	body.rotation.x = lerp(body.rotation.x,rotation.x,.05)
-	body.rotation.z = lerp(body.rotation.z,rotation.z,.05)
+	body.rotation.x = lerp(body.rotation.x,rotation.x,.01)
+	body.rotation.z = lerp(body.rotation.z,rotation.z,.01)
 	#body.rotation.z = rotation.z
 	#body.rotation.x = get_second_order_angle(delta,body.rotation.x,body_rotation.x)
 	#body.rotation.z = get_second_order_angle(delta,body.rotation.z,body_rotation.z)
