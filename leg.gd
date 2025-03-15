@@ -21,10 +21,12 @@ var simulation_target:Vector3
 #region Leg configuration exports
 @export_group("Segment configuration")
 @export_subgroup(("Base"))
+## Controls the offset of the segment (along the y axis).
 @export var leg_vertical_offset:float = 0:
 	set(new_value):
 		leg_vertical_offset = new_value
 		leg_offset.y = new_value
+## Controls the offset of the segment (along the z axis).
 @export var leg_horizontal_offset:float = 0:
 	set(new_value):
 		leg_horizontal_offset = new_value
@@ -166,6 +168,7 @@ var marker_childs:Array[Node3D] #can't delete all childs so keep count
 
 
 #region Setup
+## initiate leg for game runtime
 func _ready() -> void:
 	_get_nodes()
 	output_intermediate_target = Vector2.ZERO
@@ -180,6 +183,7 @@ func _get_nodes() -> void:
 	segment_2 = $Base/Segment_1/Segment_2
 	segment_3 = $Base/Segment_1/Segment_2/Segment_3
 
+## intiate leg for editor runtime
 func _initate_editor() -> void:
 	_get_nodes()
 	output_intermediate_target = Vector2.ZERO
@@ -189,6 +193,7 @@ func _initate_editor() -> void:
 	path_mesh = MeshInstance3D.new()
 	add_child(path_mesh)
 
+## update markers (called only in editor)
 func _set_markers() -> void:
 	var segments:Array = [segment_1,segment_2,segment_3]
 	for segment:LegSegment in segments:
@@ -238,29 +243,10 @@ func move_leg(delta:float) -> void:
 			path_array.append(to_local(segment_3.segment_end.global_position))
 	IK_variables =  get_IK_variables(target_marker.global_position)
 	rotate_base(delta)
-	extend_arms(delta)
+	extend_leg(delta)
 	update_returning_status()
 
-func get_IK_variables(target:Vector3) -> Dictionary:
-	target = to_local(target)
-	var start_pos:Vector3 = to_local(base.global_position)
-	var top_down_tg:Vector2 = Vector2(target.x,target.z)
-	var direction:Vector2 = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
-
-	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
-	top_down_tg = Vector2(target.x,target.z)
-
-	var danger_margin: float = .2
-	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
-	if diff < Vector2.ZERO:
-		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
-	elif diff < Vector2.ONE * danger_margin:
-		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
-
-	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
-	var intermediate_tg:Vector2 = get_intermediate_target(segment_3.segment_length,side_view_tg)
-	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
-
+## rotate leg towards target
 func rotate_base(delta:float) -> void:
 	if is_returning:
 		@warning_ignore("unsafe_call_argument")
@@ -274,7 +260,8 @@ func rotate_base(delta:float) -> void:
 	if base.rotation.y > 1 or base.rotation.y < -1:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 
-func extend_arms(delta:float) -> void:
+## extend leg to target (in a plane)
+func extend_leg(delta:float) -> void:
 	if is_returning:
 		@warning_ignore("unsafe_call_argument")
 		output_intermediate_target = extension_second_order.vec2_second_order_response(
@@ -292,6 +279,7 @@ func extend_arms(delta:float) -> void:
 	elif middle_angle < PI/6:
 		desired_state = DesiredState.NEEDS_RESTEP
 
+## get angle of second segment
 func get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
 	var a:float = 2*PI
 	var b:float = -1
@@ -302,6 +290,7 @@ func get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
 	var y:float = target.y
 	return a + b *  acos((x**2+y**2-L1**2-L2**2) /(2*L1*L2) )
 
+## get angle of first segment
 func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> float:
 	var x:float = target.x
 	var y:float = target.y
@@ -309,7 +298,7 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 #endregion
 
 
-#region Update leg state
+#region Update leg returning state
 func update_returning_status() -> void:
 	if is_returning:
 		var max_horizontal_length:float = get_max_horizontal_length()
@@ -332,12 +321,12 @@ func check_dist_to_rest() -> void:
 	if dist_to_rest < .0001: # is_equal_approx to sensible
 		is_returning = false
 		@warning_ignore("return_value_discarded")
-		draw_multi_line(path_array,path_mesh)
+		draw_multi_line(path_array,path_mesh) # path array empty on game runtime
 		path_array.clear()
 #endregion
 
 
-#region editor walk simulation
+#region Editor walk simulation
 func emulate_target_position(delta:float) -> Vector3:
 	var target_pos:Vector3 = target_marker.position
 	if is_returning:
@@ -348,6 +337,7 @@ func emulate_target_position(delta:float) -> Vector3:
 		check_end_ground_phase()
 	return to_global(target_pos)
 
+## update is_returning
 func check_end_ground_phase() -> void:
 	@warning_ignore("unsafe_call_argument")
 	var intermediate_target3D:Vector3 =  get_intermediate_target3D(
@@ -366,6 +356,7 @@ func check_end_ground_phase() -> void:
 	if dist_too_large or dist_too_low:
 		is_returning = true
 
+## draw trajectory (used for walk simulation path)
 func draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> MeshInstance3D:
 	if not line_points.size() > 0:
 		return old_mesh
@@ -390,21 +381,7 @@ func draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> Mesh
 
 
 #region State variables getters
-func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
-	desired_state = DesiredState.RETURNING
-	var target_pos2D:Vector2 = Vector2(target_pos.x,target_pos.z)
-	var rest_pos2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
-	var dir:Vector2 = target_pos2D.direction_to(rest_pos2D)
-	var dist_sqrd:float = target_pos2D.distance_squared_to(rest_pos2D)
-	var move_effect:Vector2 = dir * delta * extension_speed
-
-	if move_effect.length()**2 > dist_sqrd:
-		target_pos2D = rest_pos2D
-	else: target_pos2D += move_effect
-
-	target_pos = Vector3(target_pos2D.x,get_returning_height(),target_pos2D.y)
-	return target_pos
-
+## get resting position
 func get_rest_pos() -> Vector3:
 	var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
 	var rest_position:Vector3 = (Vector3(rest_distance,0,0) + Vector3(offset.x,0,offset.z) +
@@ -426,6 +403,23 @@ func get_rest_pos() -> Vector3:
 		rest_position.y = -leg_height - position.y
 	return rest_position
 
+## get next target pos of returning legs
+func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
+	desired_state = DesiredState.RETURNING
+	var target_pos2D:Vector2 = Vector2(target_pos.x,target_pos.z)
+	var rest_pos2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
+	var dir:Vector2 = target_pos2D.direction_to(rest_pos2D)
+	var dist_sqrd:float = target_pos2D.distance_squared_to(rest_pos2D)
+	var move_effect:Vector2 = dir * delta * extension_speed
+
+	if move_effect.length()**2 > dist_sqrd:
+		target_pos2D = rest_pos2D
+	else: target_pos2D += move_effect
+
+	target_pos = Vector3(target_pos2D.x,get_returning_height(),target_pos2D.y)
+	return target_pos
+
+## get target height of returning legs
 func get_returning_height() -> float:
 	var max_horizontal_length:float = get_max_horizontal_length()
 	var current_horizontal_length:float = get_horizontal_length()
@@ -435,20 +429,45 @@ func get_returning_height() -> float:
 	additional_height = additional_height * max_horizontal_length
 	return estimate_height + additional_height
 
+## get leg horizontal length on last max extended position
 func get_max_horizontal_length() -> float:
 	return Vector2(last_extended_position.x,last_extended_position.z).distance_to(
 		Vector2(rest_pos.x,rest_pos.z))
 
+## get current horitontal length
 func get_horizontal_length() -> float:
 	var dist:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)-(
 		Vector2(rest_pos.x,rest_pos.z))
 	return dist.length()
 
+## process intermediate variable used for IK
+func get_IK_variables(target:Vector3) -> Dictionary:
+	target = to_local(target)
+	var start_pos:Vector3 = to_local(base.global_position)
+	var top_down_tg:Vector2 = Vector2(target.x,target.z)
+	var direction:Vector2 = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
+
+	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
+	top_down_tg = Vector2(target.x,target.z)
+
+	var danger_margin: float = .2
+	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
+	if diff < Vector2.ZERO:
+		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
+	elif diff < Vector2.ONE * danger_margin:
+		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
+
+	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
+	var intermediate_tg:Vector2 = get_intermediate_target(segment_3.segment_length,side_view_tg)
+	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
+
+## get target used for segment 1 and 2 (in side view plane)
 func get_intermediate_target(L3:float, plane_target:Vector2) -> Vector2:
 	plane_target.x -= L3 * cos(incidence_angle)
 	plane_target.y -= L3 * sin(incidence_angle)
 	return plane_target
 
+## get target used for segment 1 and 2 (in 3D)
 func get_intermediate_target3D(top_down_target:Vector2,intermediate_tg:Vector2) -> Vector3:
 	var intermediate_top_down:Vector2 = top_down_target.normalized()*intermediate_tg.x
 	return Vector3(intermediate_top_down.x,
