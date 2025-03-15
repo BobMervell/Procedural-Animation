@@ -209,8 +209,6 @@ func _get_nodes() -> void:
 #endregion
 
 
-
-
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		for child:Node in delete_childs:
@@ -225,20 +223,21 @@ func _physics_process(delta: float) -> void:
 		desired_state = DesiredState.OK_ON_GROUND
 		
 		if walk_simulation:
-			target_marker.position = emulate_target_position(delta)
+			target_marker.global_position = emulate_target_position(delta)
 			
-		IK_variables =  get_IK_variables(target_marker.position)
+		IK_variables =  get_IK_variables(target_marker.global_position)
 		rotate_base(delta)
 		extend_arms(delta)
 		update_returning_status()
 		if show_path:
 			path_array.append(to_local(segment_3.segment_end.global_position))
 
-
-
 ### FOLLOW TARGET
 
+
+
 func get_IK_variables(target:Vector3) -> Dictionary:
+	target = to_local(target)
 	var start_pos:Vector3 = to_local(base.global_position)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z)
 	var direction = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
@@ -258,18 +257,21 @@ func get_IK_variables(target:Vector3) -> Dictionary:
 	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
 
 func rotate_base(delta:float) -> void:
-	var direction:Vector2 = IK_variables["direction"]
-	output_direction = rota_second_order.vec2_second_order_response(
-			delta,direction,output_direction)["output"]
-	base.rotation.y = - output_direction.angle()
-	
+	if is_returning:
+		output_direction = rota_second_order.vec2_second_order_response(
+				delta,IK_variables["direction"],output_direction)["output"]
+		base.rotation.y = - output_direction.angle()
+	else: 
+		base.rotation.y = - IK_variables["direction"].angle()
 	if base.rotation.y > 1 or base.rotation.y < -1:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 
 func extend_arms(delta:float) -> void:
-	var intermediate_tg = IK_variables["intermediate_tg"]
-	output_intermediate_target = extension_second_order.vec2_second_order_response(
-			delta,intermediate_tg,output_intermediate_target)["output"]
+	if is_returning:
+		output_intermediate_target = extension_second_order.vec2_second_order_response(
+				delta,IK_variables["intermediate_tg"],output_intermediate_target)["output"]
+	else: 
+		output_intermediate_target = IK_variables["intermediate_tg"]
 	var middle_angle:float = get_middle_angle(segment_1.segment_length,segment_2.segment_length,output_intermediate_target)
 	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,output_intermediate_target)
 	segment_3.rotation.x = incidence_angle - middle_angle - base_angle
@@ -330,7 +332,7 @@ func emulate_target_position(delta:float) -> Vector3:
 		var dir:Vector3 = target_marker.position.direction_to(simulation_target+Vector3(0,rest_pos.y,0))
 		target_pos =  target_marker.position + dir * delta * extension_speed
 		check_end_ground_phase()
-	return target_pos
+	return to_global(target_pos)
 
 func check_end_ground_phase() -> void:
 	var intermediate_target3D:Vector3 =  get_intermediate_target3D(
@@ -393,10 +395,6 @@ func get_rest_pos() -> Vector3:
 	
 	var rest_position = (Vector3(rest_distance,0,0) +
 			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
-	
-	#var diff = rest_position - rest_pos
-	#if  is_returning and diff.length_squared() > 1 : #don't update on return
-		#return rest_pos
 	
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
 	var query_limit:Vector3 = rest_position + Vector3(0,-max_length,0)
