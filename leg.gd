@@ -7,7 +7,7 @@ const MARKER:PackedScene = preload("res://marker.tscn")
 @export_group("Simulation details")
 ## Activates a walk cycle simulation.
 @export var walk_simulation:bool = false
-var simulation_target:Vector3
+var simulation_target:Vector3 = Vector3(10,0,0)
 ## Controls the rotation angle of the leg (in radians).
 @export_range(-PI,PI,.01) var simulation_rotation:float = 0:
 	set(new_value):
@@ -21,46 +21,56 @@ var simulation_target:Vector3
 #region Leg configuration exports
 @export_group("Segment configuration")
 @export_subgroup(("Base"))
+## Controls the length of the segment (along the x axis).
+@export_range(0,5,.01,"or_greater") var base_length:float=.5:
+	set(new_value):
+		base_length = new_value
+		if not base: return
+		base.segment_length = new_value
+		base.position.x = -base.segment_length/2
+		segment_1.position.z = leg_horizontal_offset + base.segment_length/2 # (z not x because rotated PI/2)
+		base.update()
 ## Controls the offset of the segment (along the y axis).
 @export var leg_vertical_offset:float = 0:
 	set(new_value):
 		leg_vertical_offset = new_value
 		leg_offset.y = new_value
-## Controls the offset of the segment (along the z axis).
+## Controls the offset of the segment (along the x axis).
 @export var leg_horizontal_offset:float = 0:
 	set(new_value):
 		leg_horizontal_offset = new_value
-		leg_offset.x = new_value
+		leg_offset.z = new_value # (z not x because rotated PI/2)
 var leg_offset:Vector3 = Vector3.ZERO:
 	set(new_value):
-		if not segment_1: return
 		leg_offset = new_value
+		if not segment_1: return
 		segment_1.position = leg_offset
+		segment_1.position.z += base.segment_length/2
 
 @export_subgroup("Segment 1")
-## Controls the length of the segment (along the z axis).
+## Controls the length of the segment (along the x axis).
 @export_range(0,5,.01,"or_greater") var segment_1_length:float=1:
 	set(new_value):
-		if not segment_1: return
 		segment_1_length = new_value
+		if not segment_1: return
 		segment_1.segment_length = new_value
-		segment_2.position.z = segment_1.segment_length
+		segment_2.position.z = segment_1.segment_length # (z not x because rotated PI/2)
 		segment_1.update()
 @export_subgroup("Segment 2")
-## Controls the length of the segment (along the z axis).
+## Controls the length of the segment (along the x axis).
 @export_range(0,5,.01,"or_greater") var segment_2_length:float=1:
 	set(new_value):
-		if not segment_2: return
 		segment_2_length = new_value
+		if not segment_2: return
 		segment_2.segment_length = new_value
-		segment_3.position.z = segment_2.segment_length
+		segment_3.position.z = segment_2.segment_length # (z not x because rotated PI/2)
 		segment_2.update()
 @export_subgroup("Segment 3")
-## Controls the length of the segment (along the z axis).
+## Controls the length of the segment (along the x axis).
 @export_range(0,5,.01,"or_greater") var segment_3_length:float=1:
 	set(new_value):
-		if not segment_3: return
 		segment_3_length = new_value
+		if not segment_3: return
 		segment_3.segment_length = new_value
 		segment_3.update()
 #endregion
@@ -186,12 +196,22 @@ func _get_nodes() -> void:
 ## intiate leg for editor runtime
 func _initate_editor() -> void:
 	_get_nodes()
+	update_segment_lengths()
 	output_intermediate_target = Vector2.ZERO
 	output_direction = Vector2.ZERO
 	rota_second_order = SecondOrderSystem.new(rota_second_order_config)
 	extension_second_order = SecondOrderSystem.new(extension_second_order_config)
 	path_mesh = MeshInstance3D.new()
 	add_child(path_mesh)
+
+
+func update_segment_lengths() -> void:
+	base_length = base_length
+	leg_horizontal_offset = leg_horizontal_offset
+	leg_vertical_offset = leg_vertical_offset
+	segment_1_length = segment_1_length
+	segment_2_length = segment_2_length
+	segment_3_length = segment_3_length
 
 ## update markers (called only in editor)
 func _set_markers() -> void:
@@ -252,10 +272,10 @@ func rotate_base(delta:float) -> void:
 		@warning_ignore("unsafe_call_argument")
 		output_direction = rota_second_order.vec2_second_order_response(
 				delta,IK_variables["direction"],output_direction)["output"]
-		base.rotation.y = - output_direction.angle()
+		base.rotation.y = - output_direction.angle() + PI/2
 	else:
 		@warning_ignore("unsafe_method_access")
-		base.rotation.y = - IK_variables["direction"].angle()
+		base.rotation.y = - IK_variables["direction"].angle() + PI/2
 		output_direction = IK_variables["direction"]
 	if base.rotation.y > 1 or base.rotation.y < -1:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
@@ -386,8 +406,8 @@ func get_rest_pos() -> Vector3:
 	var offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y)
 	var rest_position:Vector3 = (Vector3(rest_distance,0,0) + Vector3(offset.x,0,offset.z) +
 			 (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y))
-
-	if is_returning and rest_position.distance_squared_to(rest_pos)>1:
+	if (not rest_pos ==Vector3.ZERO and (
+			is_returning and rest_position.distance_squared_to(rest_pos)>1 )):
 		return rest_pos
 
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
