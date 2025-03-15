@@ -3,7 +3,7 @@ extends Node3D
 class_name LegSegment
 
 
-const MARKER = preload("res://marker.tscn")
+const MARKER:PackedScene = preload("res://marker.tscn")
 ## Controls the length of the segment (along the z axis).
 @export_range(0,5,.01,"or_greater") var segment_length:float=1:
 	set(new_value):
@@ -30,8 +30,8 @@ var segment_begin:Node3D
 var segment_shape: CSGBox3D
 var delete_childs:Array[Node3D] #can't delete all childs so keep count
 
-func update():
-	for child in delete_childs:
+func update() -> void:
+	for child:Node in delete_childs:
 		child.queue_free()
 	delete_childs.clear()
 	segment_begin = add_marker(begin_marker_color)
