@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cwgjxcyy812jj"]
 
-[ext_resource type="Script" path="res://leg.gd" id="1_wim6m"]
+[ext_resource type="Script" uid="uid://5s4trt3hdmkw" path="res://leg.gd" id="1_wim6m"]
 [ext_resource type="PackedScene" uid="uid://biquj5747frdg" path="res://leg_segment.tscn" id="1_xjxfj"]
 
 [sub_resource type="Curve" id="Curve_804en"]
