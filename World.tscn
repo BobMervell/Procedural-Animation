@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://h0dto0xiarh4"]
 
 [ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="2_k1kkn"]
-[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://leg.tscn" id="2_o1g6v"]
+[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="2_o1g6v"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fidmb"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -34,8 +34,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.734842, 0.00527989, -0.677772, -0.227586, 0.943729, -0.23922, 0.638708, 0.330198, 0.694546, 8.45166, 9.00284, -15.344)
-velocity = Vector3(0, 0, 1.4013e-45)
+transform = Transform3D(0.999337, 0.00895307, -0.0308826, -0.0303669, 0.579198, -0.814147, 0.0106035, 0.814953, 0.578964, -6.72715e-06, 2.98255, 1.19663)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -89,7 +88,6 @@ extension_speed = 20.0
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 _show_path = false
 
 [node name="LegHR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
@@ -111,7 +109,6 @@ extension_speed = 20.0
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 _show_path = false
 
 [node name="Camera3D" type="Camera3D" parent="Robot"]
@@ -119,7 +116,7 @@ transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.93
 fov = 90.0
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(0.734841, 0.00527993, -0.677864, -0.227586, 0.943724, -0.239253, 0.638707, 0.330196, 0.694641, 8.45166, 9.00284, -15.344)
+transform = Transform3D(0.999335, 0.00895295, -0.0308868, -0.0303668, 0.579196, -0.814258, 0.0106035, 0.814951, 0.579042, 0, 2.98255, 1.19664)
 script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
