@@ -34,8 +34,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.998478, 0.052329, 1.02422e-08, -0.0491726, 0.938272, -0.341847, -0.0178974, 0.341503, 0.939217, 6.07569, 6.83893, -9.39869)
-velocity = Vector3(1.4013e-45, 0, 0)
+transform = Transform3D(0.999832, 0.000837989, -3.0502e-08, -0.000788385, 0.940775, -0.338756, -0.00028385, 0.338755, 0.940777, 6.12929, 5.87556, -6.75185)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -74,6 +73,7 @@ size = Vector3(2.7, 0.488, 2.7)
 transform = Transform3D(0.707107, 2.50174e-09, -0.707107, 1.49012e-08, 1, 1.84392e-08, 0.707107, -2.35752e-08, 0.707107, 1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
+target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
@@ -86,6 +86,7 @@ _show_path = false
 transform = Transform3D(-0.707107, -2.73005e-08, -0.707107, -1.49012e-08, 1, -2.37075e-08, 0.707107, -6.22702e-09, -0.707107, -1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
+target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
@@ -98,6 +99,7 @@ _show_path = false
 transform = Transform3D(-0.707107, 2.50174e-09, 0.707107, -1.49012e-08, 1, -1.84392e-08, -0.707107, -2.35752e-08, -0.707107, -1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
+target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
@@ -110,6 +112,7 @@ _show_path = false
 transform = Transform3D(0.707107, -2.73005e-08, 0.707107, 1.49012e-08, 1, 2.37075e-08, -0.707107, -6.22702e-09, 0.707107, 1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
+target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
@@ -123,7 +126,7 @@ transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.93
 fov = 90.0
 
 [node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(0.998482, 0.0523279, 0, -0.0491724, 0.938261, -0.341894, -0.0178973, 0.341499, 0.939345, 6.07569, 6.83893, -9.39869)
+transform = Transform3D(0.999827, 0.000837873, -3.05118e-08, -0.000788328, 0.940708, -0.338661, -0.00028383, 0.338731, 0.940511, 6.12932, 5.87556, -6.75183)
 script = ExtResource("2_k1kkn")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
