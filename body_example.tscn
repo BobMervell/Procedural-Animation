@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://h0dto0xiarh4"]
 
-[ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="2_k1kkn"]
-[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="2_o1g6v"]
+[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="1_kn7ji"]
+[ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="2_2rfbf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fidmb"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -34,7 +34,8 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="CharacterBody3D" parent="."]
-transform = Transform3D(0.999832, 0.000837989, -3.0502e-08, -0.000788385, 0.940775, -0.338756, -0.00028385, 0.338755, 0.940777, 6.12929, 5.87556, -6.75185)
+transform = Transform3D(0.999831, 4.85291e-05, -2.89476e-09, -4.55065e-05, 0.93772, -0.347184, -1.68455e-05, 0.347187, 0.937711, -1.42863, 6.53535, -8.25139)
+velocity = Vector3(-1.4013e-45, 0, 1.4013e-45)
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_2ikg7")
@@ -69,71 +70,59 @@ height = 0.207148
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1441, 0)
 size = Vector3(2.7, 0.488, 2.7)
 
-[node name="LegFL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegFL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(0.707107, 2.50174e-09, -0.707107, 1.49012e-08, 1, 1.84392e-08, 0.707107, -2.35752e-08, 0.707107, 1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 _target_pos_marker_color = Color(1, 1, 0, 1)
-_show_path = false
 
-[node name="LegFR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegFR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(-0.707107, -2.73005e-08, -0.707107, -1.49012e-08, 1, -2.37075e-08, 0.707107, -6.22702e-09, -0.707107, -1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 _target_pos_marker_color = Color(1, 1, 0, 1)
-_show_path = false
 
-[node name="LegHR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegHR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(-0.707107, 2.50174e-09, 0.707107, -1.49012e-08, 1, -1.84392e-08, -0.707107, -2.35752e-08, -0.707107, -1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 _target_pos_marker_color = Color(1, 1, 0, 1)
-_show_path = false
 
-[node name="LegHL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_o1g6v")]
+[node name="LegHL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(0.707107, -2.73005e-08, 0.707107, 1.49012e-08, 1, 2.37075e-08, -0.707107, -6.22702e-09, 0.707107, 1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-target_sensibility_treshold = 0.1
 extension_speed = 20.0
 move_direction_impact = 0.7
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 _target_pos_marker_color = Color(1, 1, 0, 1)
-_show_path = false
 
-[node name="Camera3D" type="Camera3D" parent="Robot"]
-transform = Transform3D(1.00012, 0, 0, 0, 0.939849, 0.342095, 0, -0.342077, 0.939898, 0, 10, 20)
-fov = 90.0
-
-[node name="4_radial_legged_controller" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(0.999827, 0.000837873, -3.05118e-08, -0.000788328, 0.940708, -0.338661, -0.00028383, 0.338731, 0.940511, 6.12932, 5.87556, -6.75183)
-script = ExtResource("2_k1kkn")
+[node name="RadialQuadripedController" type="CharacterBody3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
+transform = Transform3D(0.999936, 4.85264e-05, -2.8976e-09, -4.55057e-05, 0.937784, -0.347202, -1.68452e-05, 0.347211, 0.93776, -1.42867, 6.53535, -8.25141)
+script = ExtResource("2_2rfbf")
 front_left_leg = NodePath("../Robot/LegFL")
 front_right_leg = NodePath("../Robot/LegFR")
 hind_right_leg = NodePath("../Robot/LegHR")
 hind_left_leg = NodePath("../Robot/LegHL")
 body = NodePath("../Robot")
-body_desired_height = 2.886
+body_desired_height = 3.0
 _move_second_order_config = {
 "k": 1,
 "wo": 40,
@@ -148,6 +137,7 @@ _rotation_second_order_config = {
 "z": 0
 }
 _rotation_second_order = NodePath("")
+metadata/_custom_type_script = "uid://dtvexbfsjskmq"
 
 [node name="Ground" type="Area3D" parent="."]
 
@@ -159,3 +149,7 @@ shape = SubResource("BoxShape3D_ba2c8")
 transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_d0tfp")
 size = Vector3(100, 1, 100)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.897896, -0.150748, 0.413591, 0.149896, 0.778689, 0.609241, -0.413901, 0.609031, -0.676585, 7.3728, 22.0587, -21.7229)
+fov = 51.8

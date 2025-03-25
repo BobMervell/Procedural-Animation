@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://bowe0dmsj7clg"]
+
+[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="1_uwntv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jbk2j"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qhia6"]
+albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Ground" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.70643, 0)
+shape = SubResource("BoxShape3D_jbk2j")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.70643, 0)
+material_override = SubResource("StandardMaterial3D_qhia6")
+size = Vector3(100, 1, 100)
+
+[node name="ThreeSegmentLeg" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_uwntv")]
+segment_1_length = 0.93
+segment_3_length = 2.0
+elbow_up = false
+_rota_second_order = NodePath("")
+_extension_second_order = NodePath("")
+_show_rest_pos_marker = true
+_show_target_pos_marker = true
+_target_pos_marker_color = Color(1, 1, 0, 1)
+_show_path = true
