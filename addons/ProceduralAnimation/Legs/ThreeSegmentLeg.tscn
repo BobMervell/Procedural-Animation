@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://cwgjxcyy812jj"]
+
+[ext_resource type="Script" uid="uid://5s4trt3hdmkw" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.gd" id="1_wim6m"]
+[ext_resource type="PackedScene" uid="uid://biquj5747frdg" path="res://addons/ProceduralAnimation/LegSegment/leg_segment.tscn" id="1_xjxfj"]
+
+[sub_resource type="Curve" id="Curve_804en"]
+_data = [Vector2(0, 0), 0.0, 1.55854, 0, 0, Vector2(0.851163, 0.382023), 0.0, 0.0, 0, 0, Vector2(1, 0), -5.82905, 0.0, 0, 0]
+point_count = 3
+
+[node name="ThreeSegmentLeg" type="Node3D" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order")]
+script = ExtResource("1_wim6m")
+rest_distance = 1.0
+_returning_trajectory = SubResource("Curve_804en")
+_rota_second_order_config = {
+"k": 1,
+"wo": 40,
+"xi": 1,
+"z": 0
+}
+_rota_second_order = NodePath("")
+_extension_second_order_config = {
+"k": 1,
+"wo": 40,
+"xi": 1,
+"z": 0
+}
+_extension_second_order = NodePath("")
+_show_begin_segment_markers = false
+_show_end_segment_markers = false
+_show_rest_pos_marker = false
+_show_target_pos_marker = false
+_show_path = false
+
+[node name="Base" parent="." instance=ExtResource("1_xjxfj")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.25, 0, 1.09278e-08)
+
+[node name="Segment_1" parent="Base" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, -0.0771922, 0.997016, 0, -0.997016, -0.0771922, 0, 0, 0.25)
+
+[node name="Segment_2" parent="Base/Segment_1" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, -0.402222, -0.915542, 0, 0.915542, -0.402222, 0, 0, 1.5)
+
+[node name="Segment_3" parent="Base/Segment_1/Segment_2" instance=ExtResource("1_xjxfj")]
+transform = Transform3D(1, 0, 0, 0, 0.330349, -0.943857, 0, 0.943857, 0.330349, 0, 0, 1.5)
+
+[node name="Editor_target" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 0, 0)
+gizmo_extents = 0.0
