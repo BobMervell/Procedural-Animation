@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://h0dto0xiarh4"]
+[gd_scene load_steps=10 format=3 uid="uid://h0dto0xiarh4"]
 
 [ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="1_2rfbf"]
 [ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="1_kn7ji"]
@@ -25,9 +25,6 @@ size = Vector3(100, 1, 100)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d0tfp"]
 albedo_color = Color(0.160784, 0.152941, 0.172549, 1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_2rfbf"]
-size = Vector3(10, 10, 10)
-
 [node name="World" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -38,7 +35,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.960131, -1.16898e-08, -0.27922, 1.6894e-08, 0.999861, 1.62291e-08, 0.279211, -2.02996e-08, 0.960161, 49.622, -4.5615, 48.668)
+transform = Transform3D(0.951106, 0.107105, 0.289146, -4.549e-05, 0.937718, -0.347186, -0.30832, 0.330259, 0.892009, 2.972, 3.79852, -0.732002)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
@@ -116,10 +113,8 @@ move_direction_impact = 0.7
 rotation_amplitude = 2.094
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 
 [node name="RadialQuadripedController" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(1, -5.57273e-08, 0, 5.57273e-08, 1, 5.53118e-08, -3.08237e-15, -5.53118e-08, 1, 0, 0, 0)
 script = ExtResource("3_2rfbf")
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
@@ -127,69 +122,34 @@ hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
 _move_second_order_config = {
-"k": 1.0,
-"wo": 20.0,
-"xi": 1.0,
-"z": 0.0
+"k": 1,
+"wo": 40,
+"xi": 1,
+"z": 0
 }
 _move_second_order = NodePath("")
 _rotation_second_order_config = {
-"k": 1.0,
-"wo": 40.0,
-"xi": 0.3,
-"z": 0.05
+"k": 1,
+"wo": 40,
+"xi": 1,
+"z": 0
 }
 _rotation_second_order = NodePath("")
-__body_target_pos_2D = Vector2(49.622, 48.668)
-__body_target_rota_y = Vector3(0, -0.283, 0)
+__body_target_pos_2D = Vector2(2.972, -0.732002)
+__body_target_rota_y = Vector3(0.354602, 0.313464, -4.85161e-05)
 metadata/_custom_type_script = "uid://dtvexbfsjskmq"
-
-[node name="Camera3D" type="Camera3D" parent="Robot"]
-transform = Transform3D(1.00009, 0, 0, 0, 0.89031, 0.455587, 0, -0.455595, 0.890295, 0, 5.683, 16.016)
-fov = 81.3
 
 [node name="Ground" type="Area3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 20.4592, 0, 12.9726)
+transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0)
 shape = SubResource("BoxShape3D_ba2c8")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 20.4592, 0, 12.9726)
+transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_d0tfp")
 size = Vector3(100, 1, 100)
 
-[node name="Ground2" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 1.49012e-08, 1, 0, 2.98023e-08, 2.98023e-08, 1, -2.38419e-07, -14.2157, 35.3166)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 46)
-shape = SubResource("BoxShape3D_ba2c8")
-
-[node name="CSGBox3D" type="CSGBox3D" parent="Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 46)
-material_override = SubResource("StandardMaterial3D_d0tfp")
-size = Vector3(100, 1, 100)
-
-[node name="Ground3" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 1.49012e-08, 1, 0, 2.98023e-08, 2.98023e-08, 1, -2.38419e-07, -2.38419e-07, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground3"]
-transform = Transform3D(-0.0471064, -0.642074, -0.765194, 0, 0.766045, -0.642788, 0.99889, -0.0302794, -0.0360856, 65.9238, 6.64705e-06, 42.7207)
-shape = SubResource("BoxShape3D_ba2c8")
-
-[node name="CSGBox3D" type="CSGBox3D" parent="Ground3"]
-transform = Transform3D(-0.0471064, -0.642074, -0.765194, 0, 0.766045, -0.642788, 0.99889, -0.0302794, -0.0360856, 65.9238, 6.64705e-06, 42.7207)
-material_override = SubResource("StandardMaterial3D_d0tfp")
-size = Vector3(100, 1, 100)
-
-[node name="Ground4" type="Area3D" parent="."]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.5893, -12.5615, 50.4472)
-shape = SubResource("BoxShape3D_2rfbf")
-
-[node name="CSGBox3D" type="CSGBox3D" parent="Ground4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.5893, -12.5615, 50.4472)
-material_override = SubResource("StandardMaterial3D_d0tfp")
-size = Vector3(10, 10, 10)
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.897896, -0.150748, 0.413591, 0.149896, 0.778689, 0.609241, -0.413901, 0.609031, -0.676585, 7.3728, 22.0587, -21.7229)
+fov = 51.8

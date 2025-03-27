@@ -421,7 +421,6 @@ func _draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> Mes
 func get_rest_pos() -> Vector3:
 	var base_offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y )
 	var dir_offset:Vector3 = (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y)
-	#dir_offset = Vector3.ZERO
 	var rest_position:Vector3 = (Vector3(rest_distance,0,0)
 			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
 
@@ -441,6 +440,25 @@ func get_rest_pos() -> Vector3:
 		rest_position = to_local(result["position"])
 	else:
 		rest_position.y = -leg_height - position.y
+
+
+
+
+	var query_sater =  (Vector3(rest_distance,0,0)
+			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
+	var space_state = get_world_3d().direct_space_state
+	var new_query = PhysicsShapeQueryParameters3D.new()
+	new_query.collide_with_areas = true
+	new_query.shape = SphereShape3D.new()
+	new_query.shape.radius = 10  # Set an appropriate radius for the sphere
+	new_query.transform = Transform3D(Basis(), query_sater)
+	new_query.motion = query_limit - query_sater
+	#var zion = to_global(query_sater)
+
+	var new_result = space_state.intersect_shape(new_query)
+	#print(new_result)
+
+
 	return rest_position
 
 ## get next target pos of returning legs
