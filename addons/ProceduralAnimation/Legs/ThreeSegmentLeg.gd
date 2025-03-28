@@ -155,8 +155,8 @@ var _path_mesh:MeshInstance3D
 #region Process variables
 ## target for segmetns 1 and 2 for IK
 var _output_intermediate_target:Vector2
-##last position at max extension (use for returning path)
-var _last_extended_position:Vector3 = Vector3.ZERO
+## Foot position just before returning to rest position (used for returning path)
+var _last_ground_position:Vector3 = Vector3.ZERO
 ## resting position
 var rest_pos:Vector3
 ## dictionnary of format {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
@@ -165,9 +165,7 @@ var IK_variables:Dictionary
 var is_returning:bool = false:
 	set(new_value):
 		if new_value and not is_returning:
-			var next_extended_position:Vector3 = to_local(segment_3.segment_end.global_position)
-			if abs(next_extended_position) - abs(rest_pos) > Vector3.ZERO:
-				_last_extended_position = next_extended_position
+			_last_ground_position = to_local(segment_3.segment_end.global_position)
 		is_returning = new_value
 		if is_returning: _target_pos_marker_color = Color.YELLOW
 		else: _target_pos_marker_color = Color.BLUE
@@ -507,14 +505,14 @@ func _get_returning_height() -> float:
 	var max_horizontal_length:float = _get_max_horizontal_length()
 	var current_horizontal_length:float = _get_horizontal_length()
 	var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
-	var estimate_height:float = lerp(_last_extended_position.y,rest_pos.y,length_ratio)
+	var estimate_height:float = lerp(_last_ground_position.y,rest_pos.y,length_ratio)
 	var additional_height:float = _returning_trajectory.sample(length_ratio)
 	additional_height = additional_height * max_horizontal_length
 	return estimate_height + additional_height
 
 ## get leg horizontal length on last max extended position
 func _get_max_horizontal_length() -> float:
-	return Vector2(_last_extended_position.x,_last_extended_position.z).distance_to(
+	return Vector2(_last_ground_position.x,_last_ground_position.z).distance_to(
 		Vector2(rest_pos.x,rest_pos.z))
 
 ## get current horitontal length

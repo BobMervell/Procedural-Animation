@@ -38,7 +38,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(-0.150553, -0.013728, -0.988049, -0.165323, 0.985976, 0.0114971, 0.974254, 0.165191, -0.150733, 57.618, 2.00091, 17.729)
+transform = Transform3D(-0.153454, 0.00240412, -0.987606, -0.172568, 0.984379, 0.0292074, 0.972426, 0.175068, -0.150666, 56.712, 2.17998, 17.237)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
@@ -119,14 +119,14 @@ _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 
 [node name="RadialQuadripedController" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(-0.986228, -0.165402, -8.66195e-07, -0.165392, 0.98616, 0.0115023, -0.00190165, 0.011344, -0.999934, 0, 0, 0)
+transform = Transform3D(-0.984971, -0.172733, -8.65882e-07, -0.17266, 0.984547, 0.0292232, -0.00504698, 0.0287841, -0.999573, 0, 0, 0)
 script = ExtResource("3_2rfbf")
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
-target_position_2D = Vector2(57.618, 17.729)
+target_position_2D = Vector2(56.712, 17.237)
 target_rotation_y = -1.72219
 body_desired_height = 3.2
 _move_second_order_config = {
