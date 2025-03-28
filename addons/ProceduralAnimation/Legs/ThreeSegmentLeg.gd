@@ -257,9 +257,15 @@ func _add_marker(color:Color) -> Node3D:
 	return marker
 #endregion
 
+var x = Vector3.ZERO
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
+		var test:Vector3 = x - segment_3.segment_end.global_position
+		if test.length_squared() >.01 and self.name == "LegHR":
+			print(self)
+			print(test)
+		x = segment_3.segment_end.global_position
 		for child:Node in _marker_childs:
 			child.queue_free()
 		_marker_childs.clear()
@@ -275,8 +281,8 @@ func _move_leg(delta:float) -> void:
 		_set_markers()
 		if _walk_simulation:
 			target_marker.global_position = _emulate_target_position(delta)
-		if _show_path:
-			_path_array.append(to_local(segment_3.segment_end.global_position))
+			if _show_path:
+				_path_array.append(to_local(segment_3.segment_end.global_position))
 	# target_marker.global_position moved by legcontroller
 	IK_variables =  _get_IK_variables(target_marker.global_position)
 	_rotate_base(delta)
@@ -358,7 +364,10 @@ func _emulate_target_position(delta:float) -> Vector3:
 	if is_returning:
 		rest_pos = get_rest_pos()
 		target_pos = get_returning_position(delta,target_pos)
-		if is_return_phase_finished(): is_returning = false
+		if is_return_phase_finished():
+			is_returning = false
+			_draw_multi_line(_path_array,_path_mesh)
+			_path_array.clear()
 	else:
 		var dir:Vector3 = target_pos.direction_to(_simulation_target+Vector3(0,rest_pos.y,0))
 		target_pos =  target_pos + dir * delta * extension_speed

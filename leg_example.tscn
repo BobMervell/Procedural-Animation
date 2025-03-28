@@ -28,5 +28,4 @@ _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
 _show_rest_pos_marker = true
 _show_target_pos_marker = true
-_target_pos_marker_color = Color(1, 1, 0, 1)
 _show_path = true
