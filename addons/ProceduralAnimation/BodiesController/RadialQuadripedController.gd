@@ -95,7 +95,6 @@ func _initiate_legs_dictionnaries() -> void:
 func _initiate_leg_variables(leg:ThreeSegmentLegClass) -> void:
 	leg.base.rotation.y = 0
 	leg.movement_dir = Vector3.ZERO
-	leg.leg_height = body_desired_height
 #endregion
 
 
