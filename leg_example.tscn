@@ -22,6 +22,7 @@ material_override = SubResource("StandardMaterial3D_qhia6")
 size = Vector3(100, 1, 100)
 
 [node name="ThreeSegmentLeg" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_uwntv")]
+_walk_simulation = true
 move_direction_impact = 0.5
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")

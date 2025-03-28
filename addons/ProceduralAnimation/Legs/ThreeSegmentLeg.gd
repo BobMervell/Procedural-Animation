@@ -358,6 +358,7 @@ func _emulate_target_position(delta:float) -> Vector3:
 	if is_returning:
 		rest_pos = get_rest_pos()
 		target_pos = get_returning_position(delta,target_pos)
+		if is_return_phase_finished(): is_returning = false
 	else:
 		var dir:Vector3 = target_pos.direction_to(_simulation_target+Vector3(0,rest_pos.y,0))
 		target_pos =  target_pos + dir * delta * extension_speed
