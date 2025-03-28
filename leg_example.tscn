@@ -21,12 +21,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.70643, 0)
 material_override = SubResource("StandardMaterial3D_qhia6")
 size = Vector3(100, 1, 100)
 
-[node name="ThreeSegmentLeg" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_uwntv")]
-segment_1_length = 0.93
-segment_3_length = 2.0
-elbow_up = false
-_rota_second_order = NodePath("")
-_extension_second_order = NodePath("")
+[node name="ThreeSegmentLeg" parent="." instance=ExtResource("1_uwntv")]
+move_direction_impact = 0.5
 _show_rest_pos_marker = true
 _show_target_pos_marker = true
 _target_pos_marker_color = Color(1, 1, 0, 1)

@@ -86,7 +86,7 @@ var leg_offset:Vector3 = Vector3.ZERO:
 @export var rest_distance:float = 2
 ## Distance (squared) to the target before the leg considers it's on ground
 ## If the leg seems to be stuck on resting position, increase the threshold
-@export_range(.001,1,.001,"exp") var target_sensibility_treshold:float =.1
+@export_range(.001,1,.001,"exp") var target_sensibility_treshold:float =.001
 ## Trajectory followed by the leg when returning to the resting position.
 @export var _returning_trajectory:Curve
 ## Specifies the elbow configuration (up or down).
@@ -96,11 +96,15 @@ var leg_offset:Vector3 = Vector3.ZERO:
 ## Controls the speed of leg's extension/retraction.
 @export var extension_speed:float = 2
 ## body direction impact on rest positions.
-@export var move_direction_impact:float = .5
+@export_range(0,2) var move_direction_impact:float = 1
 ## Leg rotation amplitude (in radians).
 ## [br]Defines the maximum angular displacement of the leg from its rest position.
 ## [br][b]Example:[/b] For rotation_amplitude = 2*PI/4, the leg can rotate up to a quarter turn (±45°) in both directions.
-@export_range(0,2*PI,.001) var rotation_amplitude:float = 2*PI/3
+@export_range(0,2*PI,.001) var rotation_amplitude:float = 3*PI/2
+## Defines the minimum distance distance autorized between the leg base and the foot.
+## [br][b]Note:[/b] Distance processed in 2D (x,z).
+@export_range(0,1,.001) var min_dist_to_base: float = .2
+
 @export_subgroup("Rotation second order")
 ## Configuration weights for rotation second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation.
@@ -149,8 +153,6 @@ var _path_mesh:MeshInstance3D
 
 
 #region Process variables
-##desired height of body
-var leg_height:float
 ## target for segmetns 1 and 2 for IK
 var _output_intermediate_target:Vector2
 ##last position at max extension (use for returning path)
@@ -172,11 +174,13 @@ var is_returning:bool = false:
 ## movement direction of the body
 var movement_dir:Vector3
 ## used for more precise gait rules
-enum ReturningPhase {LIFTING,MID_SWING,BACK_SWING}
-var returning_phase:int = ReturningPhase.LIFTING
-## used for more precise gait rules
 enum DesiredState {OK_ON_GROUND,NEEDS_RESTEP,MUST_RESTEP,RETURNING}
 var desired_state:int = DesiredState.OK_ON_GROUND
+## Position of the foot in the world, used to anchor the feet in position
+var global_current_ground_pos:Vector3
+## color=red]Warning:[/color] Not implemented yet, will be used for gravity implementation
+var is_foot_on_ground:bool = true
+
 #endregion
 
 ## leg's element
@@ -186,17 +190,18 @@ var segment_2: LegSegment
 var segment_3: LegSegment
 var target_marker: Marker3D
 var _marker_childs:Array[Node3D] #can't delete all childs so keep count
-
-
 #region Setup
 ## initiate leg for game runtime
 func _ready() -> void:
 	_get_nodes()
 	_update_segment_lengths()
+	rest_pos = get_rest_pos()
+	global_current_ground_pos = to_global(rest_pos)
 	_output_intermediate_target = Vector2.ZERO
 	_output_direction = Vector2.ZERO
 	_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
 	_extension_second_order = SecondOrderSystem.new(_extension_second_order_config)
+
 
 func _get_nodes() -> void:
 	base = $Base
@@ -263,10 +268,8 @@ func _physics_process(delta: float) -> void:
 	_move_leg(delta)
 
 
-
 #region Move to target
 func _move_leg(delta:float) -> void:
-	rest_pos = get_rest_pos()
 	desired_state = DesiredState.OK_ON_GROUND
 	if Engine.is_editor_hint():
 		_set_markers()
@@ -274,14 +277,15 @@ func _move_leg(delta:float) -> void:
 			target_marker.global_position = _emulate_target_position(delta)
 		if _show_path:
 			_path_array.append(to_local(segment_3.segment_end.global_position))
+	# target_marker.global_position moved by legcontroller
 	IK_variables =  _get_IK_variables(target_marker.global_position)
 	_rotate_base(delta)
 	_extend_leg(delta)
-	_update_returning_status()
+
 
 ## rotate leg towards target
 func _rotate_base(delta:float) -> void:
-	if is_returning:
+	if is_returning: #second order only if not on ground
 		@warning_ignore("unsafe_call_argument")
 		_output_direction = _rota_second_order.vec2_second_order_response(
 				delta,IK_variables["direction"],_output_direction)["output"]
@@ -291,13 +295,14 @@ func _rotate_base(delta:float) -> void:
 		base.rotation.y = - IK_variables["direction"].angle() + PI/2
 		_output_direction = IK_variables["direction"]
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
+		print("angle worng")
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
 ## extend leg to target (in a plane)
 func _extend_leg(delta:float) -> void:
-	if is_returning:
+	if is_returning:#second order only if not on ground
 		@warning_ignore("unsafe_call_argument")
 		_output_intermediate_target = _extension_second_order.vec2_second_order_response(
 				delta,IK_variables["intermediate_tg"],_output_intermediate_target)["output"]
@@ -309,7 +314,7 @@ func _extend_leg(delta:float) -> void:
 	segment_2.rotation.x = middle_angle
 	segment_1.rotation.x = base_angle
 
-	if middle_angle == 0:
+	if middle_angle == 0: #if extend maximum
 		desired_state = DesiredState.MUST_RESTEP
 	elif middle_angle < PI/6:
 		desired_state = DesiredState.NEEDS_RESTEP
@@ -335,31 +340,15 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 
 
 #region Update leg returning state
-func _update_returning_status() -> void:
-	if is_returning:
-		var max_horizontal_length:float = _get_max_horizontal_length()
-		var current_horizontal_length:float = _get_horizontal_length()
-		var length_ratio:float = max(0,1 - current_horizontal_length/max_horizontal_length)
-		_update_returning_phase(length_ratio)
-		_check_dist_to_rest()
-
-func _update_returning_phase(length_ratio:float) -> void:
-	if length_ratio <.1:
-		returning_phase = ReturningPhase.LIFTING
-	elif length_ratio <.85:
-		returning_phase = ReturningPhase.MID_SWING
+func is_return_phase_finished() ->bool:
+	var dist_to_rest:float
+	if _walk_simulation:
+		dist_to_rest = target_marker.position.distance_squared_to(rest_pos)
 	else:
-		returning_phase = ReturningPhase.BACK_SWING
-
-func _check_dist_to_rest() -> void:
-	var end_pos:Vector3 = to_local(segment_3.segment_end.global_position)
-	var end_pos2D:Vector2 = Vector2(end_pos.x,end_pos.z)
-	var dist_to_rest:float = end_pos2D.distance_squared_to(Vector2(rest_pos.x,rest_pos.z))
-	if dist_to_rest < .0001: # is_equal_approx to sensible
-		is_returning = false
-		@warning_ignore("return_value_discarded")
-		_draw_multi_line(_path_array,_path_mesh) # path array empty on game runtime
-		_path_array.clear()
+		var end_pos2D:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)
+		var rest_pos_2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
+		dist_to_rest = end_pos2D.distance_squared_to(rest_pos_2D)
+	return dist_to_rest < target_sensibility_treshold # is_equal_approx to sensible
 #endregion
 
 
@@ -367,6 +356,7 @@ func _check_dist_to_rest() -> void:
 func _emulate_target_position(delta:float) -> Vector3:
 	var target_pos:Vector3 = target_marker.position
 	if is_returning:
+		rest_pos = get_rest_pos()
 		target_pos = get_returning_position(delta,target_pos)
 	else:
 		var dir:Vector3 = target_pos.direction_to(_simulation_target+Vector3(0,rest_pos.y,0))
@@ -419,47 +409,73 @@ func _draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> Mes
 #region State variables getters
 ## get resting position
 func get_rest_pos() -> Vector3:
-	var base_offset:Vector3 = leg_offset.rotated(Vector3.UP,base.rotation.y )
+	var base_offset:Vector3 = Vector3.ZERO#leg_offset.rotated(Vector3.UP,base.rotation.y )
 	var dir_offset:Vector3 = (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y)
-	var rest_position:Vector3 = (Vector3(rest_distance,0,0)
+	var default_pos:Vector3 = (Vector3(rest_distance,0,0)
 			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
-
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
-	var query_limit:Vector3 = rest_position + Vector3(0,-max_length,0)
-	rest_position = rest_position + Vector3(0,max_length/2,0)
+	var query_start = default_pos + Vector3(0,max_length/3,0)
+
 	#var debug = _add_marker(Color.SPRING_GREEN)
-	#debug.global_position = to_global(rest_position)
-	#var debug2 = _add_marker(Color.SPRING_GREEN)
-	#debug2.global_position = to_global(query_limit)
-	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(rest_position),to_global(query_limit))
+	#debug.global_position = to_global(query_start)
+
+	var potential_rest_pos:Array = []
+	var limit:Vector3 = default_pos + Vector3(0,-max_length,0)
+	var new_pos = cast_ray(query_start, limit)
+	if new_pos:
+		potential_rest_pos.append(new_pos)
+
+	var rotations: Array = [
+		Vector3(0, 0, 1),
+		#Vector3(0, 0, -1), #not used because often just under hip
+		Vector3(1, 0, 0),
+		Vector3(-1, 0, 0) ]
+	for rotation_axis:Vector3 in rotations:
+		limit = default_pos + Vector3(0, -max_length, 0).rotated(rotation_axis, PI/8)
+		new_pos = cast_ray(query_start, limit)
+		if new_pos:
+			potential_rest_pos.append(new_pos)
+
+	var rest_position = get_best_suitable_position(potential_rest_pos,default_pos)
+	#var debug2 = _add_marker(Color.BLUE)
+	#debug2.global_position = to_global(default_pos)
+	#var debug3 = _add_marker(Color.GREEN)
+	#debug3.global_position = to_global(rest_position)
+	return rest_position
+
+## returns the best resting position among an array of candidate.
+func get_best_suitable_position(potential_rest_pos,default_pos) -> Vector3:
+	var best_pos:Vector3 = default_pos
+	var start_pos:Vector3 = to_local(base.global_position)
+	var min_dist:float = +INF
+	for pos:Vector3 in potential_rest_pos:
+
+		var max_leg_range:float = (leg_horizontal_offset + segment_1.segment_length
+				+ segment_2.segment_length
+				+ segment_3.segment_length * sin(incidence_angle) )
+		if max_leg_range < base.position.distance_to(pos): continue  #ignores position to far from hip
+		var pos_2D:Vector2 = Vector2(pos.x,pos.z)
+		var diff:Vector2 = (pos_2D-Vector2(start_pos.x,start_pos.z))
+		if diff < Vector2.ONE * min_dist_to_base: continue  #ignores position to close to hip
+
+		var dist:float = pos.distance_squared_to(default_pos)
+		if dist < min_dist :
+			min_dist = dist
+			best_pos = pos
+	return best_pos
+
+
+func cast_ray(query_start,query_limit):
+	#var debug = _add_marker(Color.YELLOW)
+	#debug.global_position = to_global(query_limit)
+	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(query_start),to_global(query_limit))
 	query.collide_with_areas = true
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 
 	if not result.is_empty():
-		@warning_ignore("unsafe_call_argument")
-		rest_position = to_local(result["position"])
-	else:
-		rest_position.y = -leg_height - position.y
-
-
-
-
-	var query_sater =  (Vector3(rest_distance,0,0)
-			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
-	var space_state = get_world_3d().direct_space_state
-	var new_query = PhysicsShapeQueryParameters3D.new()
-	new_query.collide_with_areas = true
-	new_query.shape = SphereShape3D.new()
-	new_query.shape.radius = 10  # Set an appropriate radius for the sphere
-	new_query.transform = Transform3D(Basis(), query_sater)
-	new_query.motion = query_limit - query_sater
-	#var zion = to_global(query_sater)
-
-	var new_result = space_state.intersect_shape(new_query)
-	#print(new_result)
-
-
-	return rest_position
+		#var debug2 = _add_marker(Color.CRIMSON)
+		#debug2.global_position = to_global(to_local(result["position"]))
+		return to_local(result["position"])
 
 ## get next target pos of returning legs
 func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
@@ -507,11 +523,11 @@ func _get_IK_variables(target:Vector3) -> Dictionary:
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	top_down_tg = Vector2(target.x,target.z)
 
-	var danger_margin: float = .2
 	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
+
 	if diff < Vector2.ZERO:
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
-	elif diff < Vector2.ONE * danger_margin:
+	elif diff < Vector2.ONE * min_dist_to_base:
 		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
 
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)

@@ -38,7 +38,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.960131, -1.16898e-08, -0.27922, 1.6894e-08, 0.999861, 1.62291e-08, 0.279211, -2.02996e-08, 0.960161, 49.622, -4.5615, 48.668)
+transform = Transform3D(-0.152202, -0.266962, -0.951296, 0.0051731, 0.962426, -0.270836, 0.988023, -0.0461639, -0.145127, 72.349, 8.33114, 19.775)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
@@ -78,70 +78,71 @@ size = Vector3(2.7, 0.488, 2.7)
 transform = Transform3D(0.707107, 2.50174e-09, -0.707107, 1.49012e-08, 1, 1.84392e-08, 0.707107, -2.35752e-08, 0.707107, 1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-extension_speed = 20.0
-move_direction_impact = 0.7
-rotation_amplitude = 2.094
+rest_distance = 1.7
+extension_speed = 7.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 
 [node name="LegFR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(-0.707107, -2.73005e-08, -0.707107, -1.49012e-08, 1, -2.37075e-08, 0.707107, -6.22702e-09, -0.707107, -1.25, -1.5, 1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-extension_speed = 20.0
-move_direction_impact = 0.7
-rotation_amplitude = 2.094
+rest_distance = 1.7
+extension_speed = 7.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 
 [node name="LegHR" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(-0.707107, 2.50174e-09, 0.707107, -1.49012e-08, 1, -1.84392e-08, -0.707107, -2.35752e-08, -0.707107, -1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-extension_speed = 20.0
-move_direction_impact = 0.7
-rotation_amplitude = 2.094
+rest_distance = 1.7
+extension_speed = 7.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 
 [node name="LegHL" parent="Robot" node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("1_kn7ji")]
 transform = Transform3D(0.707107, -2.73005e-08, 0.707107, 1.49012e-08, 1, 2.37075e-08, -0.707107, -6.22702e-09, 0.707107, 1.25, -1.5, -1.25)
 base_length = 0.7
 leg_horizontal_offset = 0.3
-extension_speed = 20.0
-move_direction_impact = 0.7
-rotation_amplitude = 2.094
+rest_distance = 1.7
+extension_speed = 7.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
 _rota_second_order = NodePath("")
 _extension_second_order = NodePath("")
-_target_pos_marker_color = Color(1, 1, 0, 1)
 
 [node name="RadialQuadripedController" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(1, -5.57273e-08, 0, 5.57273e-08, 1, 5.53118e-08, -3.08237e-15, -5.53118e-08, 1, 0, 0, 0)
+transform = Transform3D(-0.999987, 0.00537551, -8.33855e-07, 0.00517471, 0.962587, -0.270921, -0.00145554, -0.270917, -0.962602, 0, 0, 0)
 script = ExtResource("3_2rfbf")
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
+target_position_2D = Vector2(72.349, 19.775)
+target_rotation_y = -1.72219
+body_desired_height = 3.2
 _move_second_order_config = {
 "k": 1.0,
 "wo": 20.0,
-"xi": 1.0,
+"xi": 1.5,
 "z": 0.0
 }
 _move_second_order = NodePath("")
 _rotation_second_order_config = {
 "k": 1.0,
 "wo": 40.0,
-"xi": 0.3,
-"z": 0.05
+"xi": 1.0,
+"z": 0.0
 }
 _rotation_second_order = NodePath("")
-__body_target_pos_2D = Vector2(49.622, 48.668)
-__body_target_rota_y = Vector3(0, -0.283, 0)
 metadata/_custom_type_script = "uid://dtvexbfsjskmq"
 
 [node name="Camera3D" type="Camera3D" parent="Robot"]

@@ -1,7 +1,7 @@
 @tool
 extends Node3D
 
-const SPEED:float = 10
+const SPEED:float = 5
 @onready var procedural_controller: RadialQuadripedController = $RadialQuadripedController
 
 
@@ -14,6 +14,6 @@ func _physics_process(delta: float) -> void:
 			procedural_controller.__body_target_pos_2D.y += direction.z * SPEED * delta
 
 		if Input.is_action_pressed("ui_accept"):
-			procedural_controller.__body_target_rota_y.y += delta * SPEED/2
+			procedural_controller.__body_target_rota_y.y += delta
 		if Input.is_action_pressed("ui_cancel"):
-			procedural_controller.__body_target_rota_y.y -= delta * SPEED/2
+			procedural_controller.__body_target_rota_y.y -= delta
