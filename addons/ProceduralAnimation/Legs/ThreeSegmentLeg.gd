@@ -178,7 +178,6 @@ var desired_state:int = DesiredState.OK_ON_GROUND
 var global_current_ground_pos:Vector3
 ## color=red]Warning:[/color] Not implemented yet, will be used for gravity implementation
 var is_foot_on_ground:bool = true
-
 #endregion
 
 ## leg's element
@@ -255,15 +254,9 @@ func _add_marker(color:Color) -> Node3D:
 	return marker
 #endregion
 
-var x = Vector3.ZERO
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
-		var test:Vector3 = x - segment_3.segment_end.global_position
-		if test.length_squared() >.01 and self.name == "LegHR":
-			print(self)
-			print(test)
-		x = segment_3.segment_end.global_position
 		for child:Node in _marker_childs:
 			child.queue_free()
 		_marker_childs.clear()
@@ -289,29 +282,23 @@ func _move_leg(delta:float) -> void:
 
 ## rotate leg towards target
 func _rotate_base(delta:float) -> void:
-	if is_returning: #second order only if not on ground
-		@warning_ignore("unsafe_call_argument")
-		_output_direction = _rota_second_order.vec2_second_order_response(
-				delta,IK_variables["direction"],_output_direction)["output"]
-		base.rotation.y = - _output_direction.angle() + PI/2
-	else:
-		@warning_ignore("unsafe_method_access")
-		base.rotation.y = - IK_variables["direction"].angle() + PI/2
-		_output_direction = IK_variables["direction"]
+	#@warning_ignore("unsafe_call_argument")
+	#_output_direction = _rota_second_order.vec2_second_order_response(
+			#delta,IK_variables["direction"],_output_direction)["output"]
+	#base.rotation.y = - _output_direction.angle() + PI/2
+	base.rotation.y = - IK_variables["direction"].angle() + PI/2
+
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
-		print("angle worng")
 		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
 ## extend leg to target (in a plane)
 func _extend_leg(delta:float) -> void:
-	if is_returning:#second order only if not on ground
-		@warning_ignore("unsafe_call_argument")
-		_output_intermediate_target = _extension_second_order.vec2_second_order_response(
-				delta,IK_variables["intermediate_tg"],_output_intermediate_target)["output"]
-	else:
-		_output_intermediate_target = IK_variables["intermediate_tg"]
+	#@warning_ignore("unsafe_call_argument")
+	#_output_intermediate_target = _extension_second_order.vec2_second_order_response(
+			#delta,IK_variables["intermediate_tg"],_output_intermediate_target)["output"]
+	_output_intermediate_target = IK_variables["intermediate_tg"]
 	var middle_angle:float = _get_middle_angle(segment_1.segment_length,segment_2.segment_length,_output_intermediate_target)
 	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,_output_intermediate_target)
 	segment_3.rotation.x = incidence_angle - middle_angle - base_angle
@@ -346,13 +333,14 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 #region Update leg returning state
 func is_return_phase_finished() ->bool:
 	var dist_to_rest:float
-	if _walk_simulation:
+	if true:
 		dist_to_rest = target_marker.position.distance_squared_to(rest_pos)
-	else:
-		var end_pos2D:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)
-		var rest_pos_2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
-		dist_to_rest = end_pos2D.distance_squared_to(rest_pos_2D)
-	return dist_to_rest < target_sensibility_treshold # is_equal_approx to sensible
+		#print("Dist to rest: ",dist_to_rest)
+	#else:
+		#var end_pos2D:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)
+		#var rest_pos_2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
+		#dist_to_rest = end_pos2D.distance_squared_to(rest_pos_2D)
+	return target_marker.position.is_equal_approx(rest_pos) # is_equal_approx to sensible
 #endregion
 
 
@@ -495,7 +483,8 @@ func get_returning_position(delta:float,target_pos:Vector3,) -> Vector3:
 	var move_effect:Vector2 = dir * delta * extension_speed
 
 	if move_effect.length()**2 > dist_sqrd:
-		target_pos2D = rest_pos2D
+		global_current_ground_pos = to_global(rest_pos)
+		return rest_pos
 	else: target_pos2D += move_effect
 	target_pos = Vector3(target_pos2D.x,_get_returning_height(),target_pos2D.y)
 	return target_pos

@@ -183,7 +183,6 @@ func _tilt_body() -> void:
 	body.rotation.z = lerp(body.rotation.z,rotation.z,tilt_speed)
 #endregion
 
-
 func _move_legs(delta:float):
 	for leg: ThreeSegmentLegClass in _get_returning_pair():
 		leg.rest_pos = leg.get_rest_pos()
@@ -194,7 +193,6 @@ func _move_legs(delta:float):
 		if leg.is_returning:
 			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position)
 			if leg.is_return_phase_finished():
-				leg.global_current_ground_pos = leg.to_global(leg.rest_pos)
 				leg.is_returning = false
 		else:
 			leg.target_marker.global_position = leg.global_current_ground_pos
