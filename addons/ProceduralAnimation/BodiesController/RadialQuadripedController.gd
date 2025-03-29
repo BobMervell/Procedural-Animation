@@ -166,21 +166,24 @@ func get_ground_level() -> float:
 	return target_height
 
 func _tilt_body() -> void:
-	var front_height:float = (front_left_leg.rest_pos.y + front_right_leg.rest_pos.y)*.5
-	var hind_height:float = (hind_left_leg.rest_pos.y + hind_right_leg.rest_pos.y)*.5
-	var left_height:float = (front_left_leg.rest_pos.y + hind_left_leg.rest_pos.y)*.5
-	var right_height:float = (front_right_leg.rest_pos.y + hind_right_leg.rest_pos.y)*.5
-	var x_size:float = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
-		front_right_leg.to_global(front_right_leg.rest_pos))
-	var z_size:float = front_left_leg.to_global(front_left_leg.rest_pos).distance_to(
-		hind_left_leg.to_global(hind_left_leg.rest_pos))
-	var x_angle:float = asin((hind_height - front_height)/z_size)
-	var z_angle:float = asin((left_height - right_height)/x_size)
+	var front_height:float = ((front_left_leg.target_marker.global_position.y +
+			 front_right_leg.target_marker.global_position.y) * .5)
+	var hind_height:float = ((hind_left_leg.target_marker.global_position.y +
+			 hind_right_leg.target_marker.global_position.y) * .5)
+	var left_height:float = ((front_left_leg.target_marker.global_position.y +
+			 hind_left_leg.target_marker.global_position.y) * .5)
+	var right_height:float = ((front_right_leg.target_marker.global_position.y +
+			 hind_right_leg.target_marker.global_position.y) * .5)
 
-	rotation.x = x_angle
-	rotation.z = z_angle
-	body.rotation.x = lerp(body.rotation.x,rotation.x,tilt_speed)
-	body.rotation.z = lerp(body.rotation.z,rotation.z,tilt_speed)
+	var x_size:float = front_left_leg.target_marker.global_position.distance_to(front_right_leg.target_marker.global_position)
+	var z_size:float = front_left_leg.target_marker.global_position.distance_to(hind_left_leg.target_marker.global_position)
+	var x_angle:float = asin((hind_height - front_height)/5)
+	var z_angle:float = asin((left_height - right_height)/5)
+
+	x_angle
+
+	body.rotation.x = lerp(body.rotation.x,x_angle,tilt_speed)
+	#body.rotation.z = lerp(body.rotation.z,z_angle,tilt_speed)
 #endregion
 
 func _move_legs(delta:float):
@@ -198,14 +201,19 @@ func _move_legs(delta:float):
 			leg.target_marker.global_position = leg.global_current_ground_pos
 
 func _get_returning_pair() -> Array[ThreeSegmentLegClass]:
-	#for leg:ThreeSegmentLegClass in _legs:
-		#if (leg.desired_state == leg.DesiredState.MUST_RESTEP or leg.is_returning):
-			#if _diagonal_legs_1.has(leg):
-				#return _diagonal_legs_1
-			#return _diagonal_legs_2
-	for leg:ThreeSegmentLegClass in _legs: # need a second pass because needs_restep not priority
-		if leg.desired_state == leg.DesiredState.NEEDS_RESTEP:
-			if _diagonal_legs_1.has(leg): return _diagonal_legs_1
-			return _diagonal_legs_2
+	var already_returning:bool = false
+	for leg:ThreeSegmentLegClass in _legs:
+		if leg.is_returning:
+			already_returning = (true and leg.returning_phase != leg.ReturningPhase.BACK_SWING)
+	if not already_returning:
+		for leg:ThreeSegmentLegClass in _legs:
+			if (leg.desired_state == leg.DesiredState.MUST_RESTEP or leg.is_returning):
+				if _diagonal_legs_1.has(leg):
+					return _diagonal_legs_1
+				return _diagonal_legs_2
+		for leg:ThreeSegmentLegClass in _legs: # need a second pass because needs_restep not priority
+			if leg.desired_state == leg.DesiredState.NEEDS_RESTEP:
+				if _diagonal_legs_1.has(leg): return _diagonal_legs_1
+				return _diagonal_legs_2
 	return []
 

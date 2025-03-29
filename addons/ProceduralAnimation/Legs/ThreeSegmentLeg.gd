@@ -103,7 +103,7 @@ var leg_offset:Vector3 = Vector3.ZERO:
 @export_range(0,2*PI,.001) var rotation_amplitude:float = 3*PI/2
 ## Defines the minimum distance distance autorized between the leg base and the foot.
 ## [br][b]Note:[/b] Distance processed in 2D (x,z).
-@export_range(0,1,.001) var min_dist_to_base: float = .2
+@export_range(0,1,.001) var min_dist_to_base: float = .4
 
 @export_subgroup("Rotation second order")
 ## Configuration weights for rotation second order controller.
@@ -171,6 +171,9 @@ var is_returning:bool = false:
 		else: _target_pos_marker_color = Color.BLUE
 ## movement direction of the body
 var movement_dir:Vector3
+## used for more precise gait rules
+enum ReturningPhase {LIFTING,MID_SWING,BACK_SWING}
+var returning_phase:int = ReturningPhase.LIFTING
 ## used for more precise gait rules
 enum DesiredState {OK_ON_GROUND,NEEDS_RESTEP,MUST_RESTEP,RETURNING}
 var desired_state:int = DesiredState.OK_ON_GROUND
@@ -289,7 +292,8 @@ func _rotate_base(delta:float) -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
 
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
-		is_returning = true #overrides controller
+		desired_state = DesiredState.MUST_RESTEP
+		#is_returning = true #overrides controller
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
@@ -306,8 +310,9 @@ func _extend_leg(delta:float) -> void:
 	segment_1.rotation.x = base_angle
 
 	if middle_angle == 0: #if extend maximum
-		is_returning = true #overrides controller
-	elif middle_angle < PI/6:
+		desired_state = DesiredState.MUST_RESTEP
+		#is_returning = true #overrides controller
+	elif middle_angle < PI/5:
 		desired_state = DesiredState.NEEDS_RESTEP
 
 ## get angle of second segment
@@ -327,6 +332,14 @@ func get_base_angle(L1:float,L2:float,middle_angle:float,target:Vector2) -> floa
 	var y:float = target.y
 	@warning_ignore("unsafe_call_argument")
 	return atan(y/x) - atan(L2*sin(middle_angle)/ max(.00001,(L1+L2*cos(middle_angle))) )
+
+func _update_returning_phase(length_ratio:float) -> void:
+	if length_ratio <.1:
+		returning_phase = ReturningPhase.LIFTING
+	elif length_ratio <.85:
+		returning_phase = ReturningPhase.MID_SWING
+	else:
+		returning_phase = ReturningPhase.BACK_SWING
 #endregion
 
 
@@ -376,7 +389,9 @@ func _check_end_ground_phase() -> void:
 	var dist_too_low: bool = horizontal_target_diff < .1
 	dist_too_low = false
 	if dist_too_large or dist_too_low:
-		is_returning = true
+		#is_returning = true
+		desired_state = DesiredState.MUST_RESTEP
+
 
 ## draw trajectory (used for walk simulation path)
 func _draw_multi_line(line_points:Array[Vector3],old_mesh:MeshInstance3D) -> MeshInstance3D:
@@ -497,6 +512,7 @@ func _get_returning_height() -> float:
 	var estimate_height:float = lerp(_last_ground_position.y,rest_pos.y,length_ratio)
 	var additional_height:float = _returning_trajectory.sample(length_ratio)
 	additional_height = additional_height * max_horizontal_length
+	_update_returning_phase(length_ratio)
 	return estimate_height + additional_height
 
 ## get leg horizontal length on last max extended position
@@ -523,7 +539,9 @@ func _get_IK_variables(target:Vector3) -> Dictionary:
 	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
 
 	if diff < Vector2.ZERO:
-		is_returning = true #overrides controller
+		#is_returning = true #overrides controller
+		desired_state = DesiredState.MUST_RESTEP
+
 	elif diff < Vector2.ONE * min_dist_to_base:
 		desired_state = DesiredState.NEEDS_RESTEP
 
