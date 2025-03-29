@@ -198,11 +198,11 @@ func _move_legs(delta:float):
 			leg.target_marker.global_position = leg.global_current_ground_pos
 
 func _get_returning_pair() -> Array[ThreeSegmentLegClass]:
-	for leg:ThreeSegmentLegClass in _legs:
-		if (leg.desired_state == leg.DesiredState.MUST_RESTEP or leg.is_returning):
-			if _diagonal_legs_1.has(leg):
-				return _diagonal_legs_1
-			return _diagonal_legs_2
+	#for leg:ThreeSegmentLegClass in _legs:
+		#if (leg.desired_state == leg.DesiredState.MUST_RESTEP or leg.is_returning):
+			#if _diagonal_legs_1.has(leg):
+				#return _diagonal_legs_1
+			#return _diagonal_legs_2
 	for leg:ThreeSegmentLegClass in _legs: # need a second pass because needs_restep not priority
 		if leg.desired_state == leg.DesiredState.NEEDS_RESTEP:
 			if _diagonal_legs_1.has(leg): return _diagonal_legs_1

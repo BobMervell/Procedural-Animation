@@ -289,7 +289,7 @@ func _rotate_base(delta:float) -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
 
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
-		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
+		is_returning = true #overrides controller
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
@@ -306,7 +306,7 @@ func _extend_leg(delta:float) -> void:
 	segment_1.rotation.x = base_angle
 
 	if middle_angle == 0: #if extend maximum
-		desired_state = DesiredState.MUST_RESTEP
+		is_returning = true #overrides controller
 	elif middle_angle < PI/6:
 		desired_state = DesiredState.NEEDS_RESTEP
 
@@ -523,9 +523,9 @@ func _get_IK_variables(target:Vector3) -> Dictionary:
 	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
 
 	if diff < Vector2.ZERO:
-		desired_state = max(DesiredState.MUST_RESTEP,desired_state)
+		is_returning = true #overrides controller
 	elif diff < Vector2.ONE * min_dist_to_base:
-		desired_state = max(DesiredState.NEEDS_RESTEP,desired_state)
+		desired_state = DesiredState.NEEDS_RESTEP
 
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
 	var intermediate_tg:Vector2 = _get_intermediate_target(segment_3.segment_length,side_view_tg)
