@@ -1,7 +1,7 @@
 @tool
 extends Node3D
 
-const SPEED:float = 7
+const SPEED:float = 10
 @onready var procedural_controller: RadialQuadripedController = $RadialQuadripedController
 
 

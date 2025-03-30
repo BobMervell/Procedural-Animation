@@ -18,8 +18,10 @@ class_name RadialQuadripedController
 @export_range(0,2*PI,.001) var target_rotation_y:float
 ## desired body height
 @export var body_desired_height:float = 3
-## The speed at which the body aligns itself with the ground's angle.
-@export_range(0,.5,.001) var tilt_speed:float = .1
+## Maximum tilt angle on flat ground
+@export var max_tilt_angle = PI / 6
+## Maximum tilt angle on flat ground
+@export_range(-2,2) var tilt_ratio = .1
 @export_group("Move second order")
 ## Configuration weights for move second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
@@ -53,8 +55,11 @@ var _old_body_pos:Vector3
 var _old_estimated_position_2D:Vector2
 ## used to verify if rotated via target_rotation_y or directly
 var _old_estimated_direction_y:float
-
-#region Setup
+## used to verify if moved via body_height() or directly
+var old_estimated_position_y:float
+## body movement_direction used for tilt and rest pos placement
+var body_direction:Vector3 = Vector3.ZERO
+#region Setup.
 
 func _ready() -> void:
 	if not (front_left_leg and front_right_leg and hind_right_leg
@@ -72,6 +77,7 @@ func _initiate_body() -> void:
 	_old_body_pos = body.global_position
 	target_position_2D = Vector2(body.global_position.x,body.global_position.z)
 	_old_estimated_position_2D = target_position_2D
+	old_estimated_position_y = body.global_position.y
 	target_rotation_y = body.rotation.y
 	_move_second_order = SecondOrderSystem.new(_move_second_order_config)
 	_rotation_second_order = SecondOrderSystem.new(_rotation_second_order_config)
@@ -109,6 +115,7 @@ func _physics_process(delta: float) -> void:
 	_update_body_height(delta)
 	_rotate_body(delta)
 	_tilt_body()
+	body_direction = lerp(body_direction,(body.global_position -_old_body_pos)/delta,.1)
 	_old_body_pos = body.global_position
 
 
@@ -123,7 +130,7 @@ func _move_body(delta:float) -> void:
 				delta,target_position_2D,new_pos2D)["output"]
 		body.global_position.x = new_pos2D.x
 		body.global_position.z = new_pos2D.y
-	else:
+	else: #if moved directly
 		target_position_2D = Vector2(body.global_position.x,body.global_position.z)
 	_old_estimated_position_2D = new_pos2D
 
@@ -136,19 +143,26 @@ func _rotate_body(delta:float) -> void:
 		real_direction = _rotation_second_order.vec2_second_order_response(
 				delta,desired_direction,real_direction)["output"]
 		body.rotation.y = real_direction.angle()
-	else:
+	else:#if moved directly
 		target_rotation_y = body.rotation.y
 	_old_estimated_direction_y = body.rotation.y
 
 func _update_body_height(delta:float) -> void:
-	var mean_height:float = 0
-	for leg:ThreeSegmentLegClass in _legs:
-		mean_height += leg.rest_pos.y
-	mean_height = get_ground_level() - body_desired_height
-	# able to use same second order as _move_body() cause different method (float vs vector2)
-	var target_height:float = mean_height + body_desired_height
-	body.global_position.y = _move_second_order.float_second_order_response(delta,
-			target_height, body.global_position.y,)["output"]
+	var diff = old_estimated_position_y-body.global_position.y
+	if ( abs(diff)<.1):
+		var mean_height:float = 0
+		for leg:ThreeSegmentLegClass in _legs:
+			mean_height += leg.target_marker.global_position.y
+		mean_height /= _legs.size()
+		#mean_height = get_ground_level() - body_desired_height
+		# able to use same second order as _move_body() cause different method (float vs vector2)
+		var target_height:float = mean_height + body_desired_height
+		body.global_position.y = _move_second_order.float_second_order_response(delta,
+				target_height, body.global_position.y,)["output"]
+	else:#if moved directly
+		for leg:ThreeSegmentLegClass in _legs:
+			leg.global_current_ground_pos.y -= diff
+	old_estimated_position_y = body.global_position.y
 
 func get_ground_level() -> float:
 	var target_height:float = body.global_position.y
@@ -166,24 +180,14 @@ func get_ground_level() -> float:
 	return target_height
 
 func _tilt_body() -> void:
-	var front_height:float = ((front_left_leg.target_marker.global_position.y +
-			 front_right_leg.target_marker.global_position.y) * .5)
-	var hind_height:float = ((hind_left_leg.target_marker.global_position.y +
-			 hind_right_leg.target_marker.global_position.y) * .5)
-	var left_height:float = ((front_left_leg.target_marker.global_position.y +
-			 hind_left_leg.target_marker.global_position.y) * .5)
-	var right_height:float = ((front_right_leg.target_marker.global_position.y +
-			 hind_right_leg.target_marker.global_position.y) * .5)
+	var x_angle = atan(body_direction.z*tilt_ratio/(2*PI))
+	x_angle = clamp(x_angle,-max_tilt_angle,max_tilt_angle)
+	var z_angle = atan(-body_direction.x*tilt_ratio/(2*PI))
+	z_angle = clamp(z_angle,-max_tilt_angle,max_tilt_angle)
 
-	var x_size:float = front_left_leg.target_marker.global_position.distance_to(front_right_leg.target_marker.global_position)
-	var z_size:float = front_left_leg.target_marker.global_position.distance_to(hind_left_leg.target_marker.global_position)
-	var x_angle:float = asin((hind_height - front_height)/5)
-	var z_angle:float = asin((left_height - right_height)/5)
+	body.rotation.x = x_angle
+	body.rotation.z = z_angle
 
-	x_angle
-
-	body.rotation.x = lerp(body.rotation.x,x_angle,tilt_speed)
-	#body.rotation.z = lerp(body.rotation.z,z_angle,tilt_speed)
 #endregion
 
 func _move_legs(delta:float):
@@ -191,8 +195,7 @@ func _move_legs(delta:float):
 		leg.rest_pos = leg.get_rest_pos()
 		leg.is_returning = true
 	for leg:ThreeSegmentLegClass in _legs:
-		var movement_dir = ((body.position -_old_body_pos)/delta).normalized()
-		leg.movement_dir = lerp(leg.movement_dir,movement_dir,.05)
+		leg.movement_dir = lerp(leg.movement_dir,body_direction.normalized(),.05)
 		if leg.is_returning:
 			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position)
 			if leg.is_return_phase_finished():
