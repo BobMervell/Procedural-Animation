@@ -48,22 +48,21 @@ path followed by the foot while returning to the leg's base position tailoring m
 To utilize the Procedural Animation Addon, follow these steps to set up your character with procedural movements:
 
 1. **Character Setup:**
-   - Start with a `CharacterBody3D` node. This will serve as the base for your character.
+   - Start with a `Node3D` node. This will serve as the base for your character.
 
 2. **Attach Leg Nodes:**
-   - Add four `ThreeSegmentLeg` nodes to your `CharacterBody3D`. Ensure you are using `ThreeSegmentLeg` and not `ThreeSegmentLegClass`, which is an internal class used by the plugin.
-   - Position the four `ThreeSegmentLeg` nodes at the corners of your `CharacterBody3D`.
+   - Add four `ThreeSegmentLeg` nodes to your character. Ensure you are using `ThreeSegmentLeg` and not `ThreeSegmentLegClass`, which is an internal class used by the plugin.
+   - Position the four `ThreeSegmentLeg` nodes at the corners of your character.
 
 3. **Add Controller:**
-   - Add a `RadialQuadripedController` node as a sibling to your `CharacterBody3D` (i.e., under the same parent node).
+   - Add a `RadialQuadripedController` node as a child to yourcharacter.
 
 4. **Configure the Controller:**
    - In the `RadialQuadripedController`, specify the corresponding node for each leg and the body.
    - Customize the behavior settings within the controller to match your desired animation dynamics.
 
 5. **Movement and Rotation:**
-   - To move or rotate the `CharacterBody3D` in the editor, manipulate the `RadialQuadripedController`. Your character will follow the controller's movements.
-   - Note: For movements along the Z-axis, directly adjust the `CharacterBody3D` node.
+   - You can move and rotate the caracter in the editor with the procedural animation, to do that you need to use the export variables target_position_2D and target_rotation_y in the RadialQuadripedController
 
 By following these steps, you can effectively integrate the Procedural Animation Addon into your Godot project, enabling dynamic and customizable procedural movements for your character.
 
