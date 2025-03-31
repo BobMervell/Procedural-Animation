@@ -1,5 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://h0dto0xiarh4"]
+[gd_scene load_steps=12 format=3 uid="uid://h0dto0xiarh4"]
 
+[ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="1_2rfbf"]
 [ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="1_kn7ji"]
 [ext_resource type="Script" uid="uid://dtvexbfsjskmq" path="res://addons/ProceduralAnimation/BodiesController/RadialQuadripedController.gd" id="2_2rfbf"]
 
@@ -41,7 +42,8 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.999288, -1.27787e-12, 8.74988e-22, 1.27717e-12, 0.999819, -0.00435036, 5.5604e-15, 0.0043529, 0.999236, -25.273, -10.7096, 60.0097)
+transform = Transform3D(0.999288, 0, 2.8026e-45, 0, 0.999828, 0, -2.8026e-45, 0, 0.999248, -24.818, -10.9157, 59.453)
+script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
 material_override = SubResource("StandardMaterial3D_qv7ri")
@@ -165,21 +167,20 @@ _extension_second_order = NodePath("")
 _show_rest_pos_marker = true
 
 [node name="RadialQuadripedController" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
-transform = Transform3D(1, 7.03553e-17, 1.55729e-10, 7.02828e-17, 0.999999, 5.01409e-09, -1.55745e-10, -5.01975e-09, 1, 0, 0, 0)
 script = ExtResource("2_2rfbf")
-editor_process = true
+editor_process = null
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
-target_position_2D = Vector2(-25.273, 60.018)
+target_position_2D = Vector2(-24.818, 59.453)
 body_desired_height = 2.8
-tilt_ratio = 0.05
+slope_adapt_tilt_ratio = 0.5
 _move_second_order_config = {
 "k": 1.0,
-"wo": 20.0,
-"xi": 1.5,
+"wo": 40.0,
+"xi": 1.0,
 "z": 0.0
 }
 _move_second_order = NodePath("")

@@ -22,9 +22,10 @@ class_name RadialQuadripedController
 @export_range(0,2*PI,.001) var target_rotation_y:float
 ## desired body height
 @export var body_desired_height:float = 3
+@export_range(0,1,.001,"exp") var slope_adapt_tilt_ratio:float = .1
 ## Maximum tilt angle on flat ground
 @export var max_tilt_angle:float = PI / 6
-## Maximum tilt angle on flat ground
+## Movement impact on tilt
 @export_range(-2,2) var tilt_ratio:float = .1
 @export_group("Move second order")
 ## Configuration weights for move second order controller.
@@ -185,13 +186,29 @@ func get_ground_level() -> float:
 	return target_height
 
 func _tilt_body() -> void:
-	var x_angle:float = atan(body_direction.z*tilt_ratio/(2*PI))
-	x_angle = clamp(x_angle,-max_tilt_angle,max_tilt_angle)
-	var z_angle:float = atan(-body_direction.x*tilt_ratio/(2*PI))
-	z_angle = clamp(z_angle,-max_tilt_angle,max_tilt_angle)
+	var front_height:float = ((front_left_leg.rest_pos.y +
+			 front_right_leg.rest_pos.y) * .5)
+	var hind_height:float = ((hind_left_leg.rest_pos.y +
+			 hind_right_leg.rest_pos.y) * .5)
+	var left_height:float = ((front_left_leg.rest_pos.y +
+			 hind_left_leg.rest_pos.y) * .5)
+	var right_height:float = ((front_right_leg.rest_pos.y +
+			 hind_right_leg.rest_pos.y) * .5)
 
-	body.rotation.x = x_angle
-	body.rotation.z = z_angle
+	var x_size:float = front_left_leg.rest_pos.distance_to(front_right_leg.rest_pos)
+	var z_size:float = front_left_leg.rest_pos.distance_to(hind_left_leg.rest_pos)
+	var x_angle:float = asin((hind_height - front_height)/5)
+	var z_angle:float = asin((left_height - right_height)/5)
+
+	var x_speed_tilt:float = atan(body_direction.z*tilt_ratio/(2*PI))
+	x_speed_tilt = clamp(x_speed_tilt,-max_tilt_angle,max_tilt_angle)
+	var z_speed_tilt:float = atan(-body_direction.x*tilt_ratio/(2*PI))
+	z_speed_tilt = clamp(z_speed_tilt,-max_tilt_angle,max_tilt_angle)
+
+	body.rotation.x = x_speed_tilt
+	body.rotation.x = lerp(body.rotation.x,x_angle,slope_adapt_tilt_ratio)
+	body.rotation.z = z_speed_tilt
+	body.rotation.z = lerp(body.rotation.x,z_angle,slope_adapt_tilt_ratio)
 
 #endregion
 
