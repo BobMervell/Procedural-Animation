@@ -82,6 +82,8 @@ var leg_offset:Vector3 = Vector3.ZERO:
 
 #region Leg behavior exports
 @export_group("Leg behavior")
+## Mask used for ground detection for foot placement (areas included).
+@export_flags_3d_physics var ground_mask:int
 ## Distance of the resting position from the leg base.
 @export var rest_distance:float = 2
 ## Distance (squared) to the target before the leg considers it's on ground
@@ -467,9 +469,11 @@ func cast_ray(query_start:Vector3,query_limit:Vector3):
 	#debug.global_position = to_global(query_limit)
 	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(query_start),to_global(query_limit))
 	query.collide_with_areas = true
+	query.collision_mask = ground_mask
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 
 	if not result.is_empty():
+		print("result")
 		#var debug2 = _add_marker(Color.CRIMSON)
 		#debug2.global_position = to_global(to_local(result["position"]))
 		@warning_ignore("unsafe_call_argument")
