@@ -174,7 +174,7 @@ hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
 target_position_2D = Vector2(-24.818, 59.453)
-body_desired_height = 2.808
+body_desired_height = 2.8
 slope_adapt_tilt_ratio = 0.5
 _move_second_order_config = {
 "k": 1.0,

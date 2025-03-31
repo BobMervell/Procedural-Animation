@@ -410,14 +410,14 @@ func get_rest_pos() -> Vector3:
 	var dir_offset:Vector3 = (movement_dir * move_direction_impact).rotated(Vector3(0,1,0),-global_rotation.y)
 	var default_pos:Vector3 = (Vector3(rest_distance,0,0)
 			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
-	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
-	var query_start:Vector3 = default_pos + Vector3(0,max_length/3,0)
+	var max_extend_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
+	var query_start:Vector3 = default_pos + Vector3(0,max_extend_length/3,0)
 
 	#var debug = _add_marker(Color.SPRING_GREEN)
 	#debug.global_position = to_global(query_start)
 
 	var potential_rest_pos:Array[Vector3]
-	var limit:Vector3 = default_pos + Vector3(0,-max_length,0)
+	var limit:Vector3 = default_pos + Vector3(0,-max_extend_length * 2,0)
 	@warning_ignore("untyped_declaration")
 	var new_pos = cast_ray(query_start, limit)
 	if new_pos:
@@ -429,7 +429,7 @@ func get_rest_pos() -> Vector3:
 		Vector3(1, 0, 0),
 		Vector3(-1, 0, 0) ]
 	for rotation_axis:Vector3 in rotations:
-		limit = default_pos + Vector3(0, -max_length, 0).rotated(rotation_axis, PI/8)
+		limit = default_pos + Vector3(0, -max_extend_length * 2, 0).rotated(rotation_axis, PI/8)
 		new_pos = cast_ray(query_start, limit)
 		if new_pos:
 			potential_rest_pos.append(new_pos)

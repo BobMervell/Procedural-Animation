@@ -22,6 +22,8 @@ class_name RadialQuadripedController
 @export_range(0,2*PI,.001) var target_rotation_y:float
 ## desired body height
 @export var body_desired_height:float = 3
+## Multiplier for height variation during a walk cycle
+@export_range(0,1,.001) var height_variation_ratio:float = .8
 @export_range(0,1,.001,"exp") var slope_adapt_tilt_ratio:float = .1
 ## Maximum tilt angle on flat ground
 @export var max_tilt_angle:float = PI / 6
@@ -160,9 +162,12 @@ func _update_body_height(delta:float) -> void:
 		for leg:ThreeSegmentLegClass in _legs:
 			mean_height += leg.target_marker.global_position.y
 		mean_height /= _legs.size()
+		var ground_height:float = get_ground_level()
+		var height_diff:float = min(mean_height - ground_height,body_desired_height*height_variation_ratio)
+		#print(mean_height)
 		#mean_height = get_ground_level() - body_desired_height
 		# able to use same second order as _move_body() cause different method (float vs vector2)
-		var target_height:float = mean_height + body_desired_height
+		var target_height:float = ground_height + body_desired_height + height_diff*height_variation_ratio
 		body.global_position.y = _move_second_order.float_second_order_response(delta,
 				target_height, body.global_position.y,)["output"]
 	else:#if moved directly
@@ -171,7 +176,7 @@ func _update_body_height(delta:float) -> void:
 	old_estimated_position_y = body.global_position.y
 
 func get_ground_level() -> float:
-	var target_height:float = body.global_position.y
+	var ground_height:float = body.global_position.y
 	var max_length:float = (front_left_leg.segment_1.segment_length  +
 			front_left_leg.segment_2.segment_length +
 			front_left_leg.segment_3.segment_length)
@@ -181,9 +186,8 @@ func get_ground_level() -> float:
 	query.collide_with_areas = true
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 	if not result.is_empty():
-		# able to use same second order as _move_body() cause different method (float vs vector2)
-		target_height = result["position"].y + body_desired_height
-	return target_height
+		ground_height = result["position"].y
+	return ground_height
 
 func _tilt_body() -> void:
 	var front_height:float = ((front_left_leg.rest_pos.y +
