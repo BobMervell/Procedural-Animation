@@ -1,0 +1,163 @@
+[gd_scene load_steps=6 format=3 uid="uid://bo8qvm8efda5i"]
+
+[ext_resource type="Script" uid="uid://b0trfa2m2jbc5" path="res://player_controller.gd" id="1_yhfw1"]
+[ext_resource type="PackedScene" uid="uid://cwgjxcyy812jj" path="res://addons/ProceduralAnimation/Legs/ThreeSegmentLeg.tscn" id="2_ru5oq"]
+[ext_resource type="Script" uid="uid://dtvexbfsjskmq" path="res://addons/ProceduralAnimation/BodiesController/RadialQuadripedController.gd" id="3_7xofo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ikg7"]
+albedo_color = Color(0.145098, 0, 0, 1)
+
+[sub_resource type="Curve" id="Curve_2rfbf"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.802691, 0.303371), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[node name="Robot" type="Node3D"]
+transform = Transform3D(0.999288, 0, 1.4013e-45, 0, 0.999828, 0, -1.4013e-45, 0, 0.999245, 0, 1.30026, 0)
+script = ExtResource("1_yhfw1")
+
+[node name="Head" type="CSGBox3D" parent="."]
+material_override = SubResource("StandardMaterial3D_2ikg7")
+size = Vector3(1.41666, 1.41553, 2.55945)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.793864, -0.0132736, -0.187812)
+size = Vector3(0.145996, 0.439606, 1.19818)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.791458, -0.0265472, -0.159627)
+size = Vector3(0.145996, 0.439606, 1.19818)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, 0.792448, 0.664126, -0.872775)
+size = Vector3(0.0645752, 0.171875, 1.33545)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, -0.750102, 0.668437, -0.861898)
+size = Vector3(0.0645752, 0.171875, 1.33545)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.24566)
+operation = 2
+size = Vector3(1, 1, 0.122803)
+
+[node name="Neck" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.81047, 0)
+height = 0.207148
+
+[node name="Base" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1441, 0)
+size = Vector3(2.7, 0.488, 2.7)
+
+[node name="LegFL" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_ru5oq")]
+transform = Transform3D(0.707107, 2.50174e-09, -0.707107, 1.49012e-08, 1, 1.84392e-08, 0.707107, -2.35752e-08, 0.707107, 1.25, -1.5, 1.25)
+base_length = 0.7
+leg_horizontal_offset = 0.3
+segment_1_length = 2.0
+segment_2_length = 1.7
+rest_distance = 1.7
+_returning_trajectory = SubResource("Curve_2rfbf")
+extension_speed = 15.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
+_rota_second_order = NodePath("")
+_extension_second_order_config = {
+"k": 1,
+"wo": 12.87,
+"xi": 1,
+"z": 0
+}
+_extension_second_order = NodePath("")
+_show_rest_pos_marker = true
+
+[node name="LegFR" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_ru5oq")]
+transform = Transform3D(-0.707107, -2.73005e-08, -0.707107, -1.49012e-08, 1, -2.37075e-08, 0.707107, -6.22702e-09, -0.707107, -1.25, -1.5, 1.25)
+base_length = 0.7
+leg_horizontal_offset = 0.3
+segment_1_length = 2.0
+segment_2_length = 1.7
+rest_distance = 1.7
+_returning_trajectory = SubResource("Curve_2rfbf")
+extension_speed = 15.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
+_rota_second_order = NodePath("")
+_extension_second_order_config = {
+"k": 1,
+"wo": 12.87,
+"xi": 1,
+"z": 0
+}
+_extension_second_order = NodePath("")
+_show_rest_pos_marker = true
+
+[node name="LegHR" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_ru5oq")]
+transform = Transform3D(-0.707107, 2.50174e-09, 0.707107, -1.49012e-08, 1, -1.84392e-08, -0.707107, -2.35752e-08, -0.707107, -1.25, -1.5, -1.25)
+base_length = 0.7
+leg_horizontal_offset = 0.3
+segment_1_length = 2.0
+segment_2_length = 1.7
+rest_distance = 1.7
+_returning_trajectory = SubResource("Curve_2rfbf")
+extension_speed = 15.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
+_rota_second_order = NodePath("")
+_extension_second_order_config = {
+"k": 1,
+"wo": 12.87,
+"xi": 1,
+"z": 0
+}
+_extension_second_order = NodePath("")
+_show_rest_pos_marker = true
+
+[node name="LegHL" parent="." node_paths=PackedStringArray("_rota_second_order", "_extension_second_order") instance=ExtResource("2_ru5oq")]
+transform = Transform3D(0.707107, -2.73005e-08, 0.707107, 1.49012e-08, 1, 2.37075e-08, -0.707107, -6.22702e-09, 0.707107, 1.25, -1.5, -1.25)
+base_length = 0.7
+leg_horizontal_offset = 0.3
+segment_1_length = 2.0
+segment_2_length = 1.7
+rest_distance = 1.7
+_returning_trajectory = SubResource("Curve_2rfbf")
+extension_speed = 15.0
+move_direction_impact = 0.8
+rotation_amplitude = 4.712
+_rota_second_order = NodePath("")
+_extension_second_order_config = {
+"k": 1,
+"wo": 12.87,
+"xi": 1,
+"z": 0
+}
+_extension_second_order = NodePath("")
+_show_rest_pos_marker = true
+
+[node name="RadialQuadripedController" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
+transform = Transform3D(1, 7.03553e-17, 1.55729e-10, 7.02828e-17, 0.999999, 5.01409e-09, -1.55745e-10, -5.01975e-09, 1, 0, 0, 0)
+script = ExtResource("3_7xofo")
+front_left_leg = NodePath("../LegFL")
+front_right_leg = NodePath("../LegFR")
+hind_right_leg = NodePath("../LegHR")
+hind_left_leg = NodePath("../LegHL")
+body = NodePath("..")
+body_desired_height = 2.8
+tilt_ratio = 0.05
+_move_second_order_config = {
+"k": 1.0,
+"wo": 20.0,
+"xi": 1.5,
+"z": 0.0
+}
+_move_second_order = NodePath("")
+_rotation_second_order_config = {
+"k": 1.0,
+"wo": 40.0,
+"xi": 1.0,
+"z": 0.0
+}
+_rotation_second_order = NodePath("")
+metadata/_custom_type_script = "uid://dtvexbfsjskmq"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.00009, 0, 0, 0, 0.89031, 0.455587, 0, -0.455595, 0.890295, 0, 5.683, 16.016)
+fov = 81.3

@@ -160,7 +160,7 @@ var _last_ground_position:Vector3 = Vector3.ZERO
 ## resting position
 var rest_pos:Vector3
 ## dictionnary of format {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
-var IK_variables:Dictionary
+var IK_variables:Dictionary[String,Vector2]
 ## true if leg is returning to resting position
 var is_returning:bool = false:
 	set(new_value):
@@ -279,18 +279,13 @@ func _move_leg(delta:float) -> void:
 				_path_array.append(to_local(segment_3.segment_end.global_position))
 	# target_marker.global_position moved by legcontroller
 	IK_variables =  _get_IK_variables(target_marker.global_position)
-	_rotate_base(delta)
-	_extend_leg(delta)
+	_rotate_base()
+	_extend_leg()
 
 
 ## rotate leg towards target
-func _rotate_base(delta:float) -> void:
-	#@warning_ignore("unsafe_call_argument")
-	#_output_direction = _rota_second_order.vec2_second_order_response(
-			#delta,IK_variables["direction"],_output_direction)["output"]
-	#base.rotation.y = - _output_direction.angle() + PI/2
+func _rotate_base() -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
-
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
 		desired_state = DesiredState.MUST_RESTEP
 		#is_returning = true #overrides controller
@@ -298,10 +293,7 @@ func _rotate_base(delta:float) -> void:
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
 ## extend leg to target (in a plane)
-func _extend_leg(delta:float) -> void:
-	#@warning_ignore("unsafe_call_argument")
-	#_output_intermediate_target = _extension_second_order.vec2_second_order_response(
-			#delta,IK_variables["intermediate_tg"],_output_intermediate_target)["output"]
+func _extend_leg() -> void:
 	_output_intermediate_target = IK_variables["intermediate_tg"]
 	var middle_angle:float = _get_middle_angle(segment_1.segment_length,segment_2.segment_length,_output_intermediate_target)
 	var base_angle:float = get_base_angle(segment_1.segment_length,segment_2.segment_length,middle_angle,_output_intermediate_target)
@@ -345,15 +337,7 @@ func _update_returning_phase(length_ratio:float) -> void:
 
 #region Update leg returning state
 func is_return_phase_finished() ->bool:
-	var dist_to_rest:float
-	if true:
-		dist_to_rest = target_marker.position.distance_squared_to(rest_pos)
-		#print("Dist to rest: ",dist_to_rest)
-	#else:
-		#var end_pos2D:Vector2 = Vector2(target_marker.position.x,target_marker.position.z)
-		#var rest_pos_2D:Vector2 = Vector2(rest_pos.x,rest_pos.z)
-		#dist_to_rest = end_pos2D.distance_squared_to(rest_pos_2D)
-	return target_marker.position.is_equal_approx(rest_pos) # is_equal_approx to sensible
+	return target_marker.position.is_equal_approx(rest_pos)
 #endregion
 
 
@@ -425,14 +409,14 @@ func get_rest_pos() -> Vector3:
 	var default_pos:Vector3 = (Vector3(rest_distance,0,0)
 			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
 	var max_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
-	var query_start = default_pos + Vector3(0,max_length/3,0)
+	var query_start:Vector3 = default_pos + Vector3(0,max_length/3,0)
 
 	#var debug = _add_marker(Color.SPRING_GREEN)
 	#debug.global_position = to_global(query_start)
 
-	var potential_rest_pos:Array = []
+	var potential_rest_pos:Array[Vector3]
 	var limit:Vector3 = default_pos + Vector3(0,-max_length,0)
-	var new_pos = cast_ray(query_start, limit)
+	var new_pos:Vector3 = cast_ray(query_start, limit)
 	if new_pos:
 		potential_rest_pos.append(new_pos)
 
@@ -447,7 +431,7 @@ func get_rest_pos() -> Vector3:
 		if new_pos:
 			potential_rest_pos.append(new_pos)
 
-	var rest_position = get_best_suitable_position(potential_rest_pos,default_pos)
+	var rest_position:Vector3 = get_best_suitable_position(potential_rest_pos,default_pos)
 	#var debug2 = _add_marker(Color.BLUE)
 	#debug2.global_position = to_global(default_pos)
 	#var debug3 = _add_marker(Color.GREEN)
@@ -455,7 +439,7 @@ func get_rest_pos() -> Vector3:
 	return rest_position
 
 ## returns the best resting position among an array of candidate.
-func get_best_suitable_position(potential_rest_pos,default_pos) -> Vector3:
+func get_best_suitable_position(potential_rest_pos:Array[Vector3],default_pos:Vector3) -> Vector3:
 	var best_pos:Vector3 = default_pos
 	var start_pos:Vector3 = to_local(base.global_position)
 	var min_dist:float = +INF
@@ -476,7 +460,8 @@ func get_best_suitable_position(potential_rest_pos,default_pos) -> Vector3:
 	return best_pos
 
 
-func cast_ray(query_start,query_limit):
+@warning_ignore("untyped_declaration")
+func cast_ray(query_start:Vector3,query_limit:Vector3):
 	#var debug = _add_marker(Color.YELLOW)
 	#debug.global_position = to_global(query_limit)
 	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(to_global(query_start),to_global(query_limit))
@@ -486,6 +471,7 @@ func cast_ray(query_start,query_limit):
 	if not result.is_empty():
 		#var debug2 = _add_marker(Color.CRIMSON)
 		#debug2.global_position = to_global(to_local(result["position"]))
+		@warning_ignore("unsafe_call_argument")
 		return to_local(result["position"])
 
 ## get next target pos of returning legs
@@ -527,7 +513,7 @@ func _get_horizontal_length() -> float:
 	return dist.length()
 
 ## process intermediate variable used for IK
-func _get_IK_variables(target:Vector3) -> Dictionary:
+func _get_IK_variables(target:Vector3) -> Dictionary[String,Vector2]:
 	target = to_local(target)
 	var start_pos:Vector3 = to_local(base.global_position)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z)

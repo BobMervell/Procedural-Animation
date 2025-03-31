@@ -19,9 +19,9 @@ class_name RadialQuadripedController
 ## desired body height
 @export var body_desired_height:float = 3
 ## Maximum tilt angle on flat ground
-@export var max_tilt_angle = PI / 6
+@export var max_tilt_angle:float = PI / 6
 ## Maximum tilt angle on flat ground
-@export_range(-2,2) var tilt_ratio = .1
+@export_range(-2,2) var tilt_ratio:float = .1
 @export_group("Move second order")
 ## Configuration weights for move second order controller.
 ## [br]See [b]SecondOrderSystem[/b] documentation
@@ -136,9 +136,9 @@ func _move_body(delta:float) -> void:
 
 func _rotate_body(delta:float) -> void:
 	var real_direction:Vector2 = Vector2.from_angle(body.rotation.y)
-	var angle_difference:float = abs(atan2(sin(_old_estimated_direction_y - body.rotation.y),
+	var angle_diff:float = abs(atan2(sin(_old_estimated_direction_y - body.rotation.y),
 			cos(_old_estimated_direction_y - body.rotation.y)))
-	if (angle_difference < .0001):
+	if (angle_diff < .0001):
 		var desired_direction:Vector2 = Vector2.from_angle(target_rotation_y)
 		real_direction = _rotation_second_order.vec2_second_order_response(
 				delta,desired_direction,real_direction)["output"]
@@ -148,7 +148,7 @@ func _rotate_body(delta:float) -> void:
 	_old_estimated_direction_y = body.rotation.y
 
 func _update_body_height(delta:float) -> void:
-	var diff = old_estimated_position_y-body.global_position.y
+	var diff:float = old_estimated_position_y-body.global_position.y
 	if ( abs(diff)<.1):
 		var mean_height:float = 0
 		for leg:ThreeSegmentLegClass in _legs:
@@ -180,9 +180,9 @@ func get_ground_level() -> float:
 	return target_height
 
 func _tilt_body() -> void:
-	var x_angle = atan(body_direction.z*tilt_ratio/(2*PI))
+	var x_angle:float = atan(body_direction.z*tilt_ratio/(2*PI))
 	x_angle = clamp(x_angle,-max_tilt_angle,max_tilt_angle)
-	var z_angle = atan(-body_direction.x*tilt_ratio/(2*PI))
+	var z_angle:float = atan(-body_direction.x*tilt_ratio/(2*PI))
 	z_angle = clamp(z_angle,-max_tilt_angle,max_tilt_angle)
 
 	body.rotation.x = x_angle
@@ -190,7 +190,7 @@ func _tilt_body() -> void:
 
 #endregion
 
-func _move_legs(delta:float):
+func _move_legs(delta:float) -> void:
 	for leg: ThreeSegmentLegClass in _get_returning_pair():
 		leg.rest_pos = leg.get_rest_pos()
 		leg.is_returning = true
