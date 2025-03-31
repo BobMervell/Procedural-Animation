@@ -12,7 +12,7 @@ _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.802691, 0.303371), 0.0, 0.0, 0
 point_count = 3
 
 [node name="Robot" type="Node3D"]
-transform = Transform3D(0.999288, 0, 1.4013e-45, 0, 0.999828, 0, -1.4013e-45, 0, 0.999245, 0, 1.30026, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.45707e-07, 0)
 script = ExtResource("1_yhfw1")
 
 [node name="Head" type="CSGBox3D" parent="."]
@@ -135,6 +135,7 @@ _show_rest_pos_marker = true
 [node name="RadialQuadripedController" type="Node3D" parent="." node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
 transform = Transform3D(1, 7.03553e-17, 1.55729e-10, 7.02828e-17, 0.999999, 5.01409e-09, -1.55745e-10, -5.01975e-09, 1, 0, 0, 0)
 script = ExtResource("3_7xofo")
+editor_process = true
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
