@@ -2,6 +2,10 @@
 extends Node3D
 class_name RadialQuadripedController
 
+## Toggles the process of the procedural animation within the editor.
+## [br][color=red]Warning:[/color] Do not activate until all legs and body are configured.
+## Reload the scene before activating
+@export var editor_process:bool = false
 ## front left leg node
 @export var front_left_leg:ThreeSegmentLegClass
 ## front right leg node
@@ -105,18 +109,19 @@ func _initiate_leg_variables(leg:ThreeSegmentLegClass) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() and editor_process:
 		if not (front_left_leg and front_right_leg and hind_right_leg
 				and hind_right_leg and body): return
 		if _diagonal_legs_1.is_empty():
 			call_deferred("_initiate_controller")
-	_move_body(delta)
-	_move_legs(delta)
-	_update_body_height(delta)
-	_rotate_body(delta)
-	_tilt_body()
-	body_direction = lerp(body_direction,(body.global_position -_old_body_pos)/delta,.1)
-	_old_body_pos = body.global_position
+	if not Engine.is_editor_hint() or editor_process:
+		_move_body(delta)
+		_move_legs(delta)
+		_update_body_height(delta)
+		_rotate_body(delta)
+		_tilt_body()
+		body_direction = lerp(body_direction,(body.global_position -_old_body_pos)/delta,.1)
+		_old_body_pos = body.global_position
 
 
 
