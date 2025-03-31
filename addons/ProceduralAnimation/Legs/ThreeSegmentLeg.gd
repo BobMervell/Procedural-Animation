@@ -473,7 +473,6 @@ func cast_ray(query_start:Vector3,query_limit:Vector3):
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 
 	if not result.is_empty():
-		print("result")
 		#var debug2 = _add_marker(Color.CRIMSON)
 		#debug2.global_position = to_global(to_local(result["position"]))
 		@warning_ignore("unsafe_call_argument")
