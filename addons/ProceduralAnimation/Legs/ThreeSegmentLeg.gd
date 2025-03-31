@@ -283,14 +283,21 @@ func _move_leg(delta:float) -> void:
 	IK_variables =  _get_IK_variables(target_marker.global_position)
 	_rotate_base()
 	_extend_leg()
+	_update_desired_state()
 
+func _update_desired_state() -> void:
+	var angle_diff:float = abs(atan2(sin(segment_2.rotation.x - PI),
+			cos(segment_2.rotation.x - PI)))
+	if angle_diff < PI/12 or angle_diff > 11*PI/12:
+		desired_state = DesiredState.MUST_RESTEP
+	elif angle_diff < PI/10 or angle_diff > 5*PI/6:
+		desired_state = DesiredState.NEEDS_RESTEP
 
 ## rotate leg towards target
 func _rotate_base() -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
 	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
 		desired_state = DesiredState.MUST_RESTEP
-		#is_returning = true #overrides controller
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)
 
@@ -302,12 +309,6 @@ func _extend_leg() -> void:
 	segment_3.rotation.x = incidence_angle - middle_angle - base_angle
 	segment_2.rotation.x = middle_angle
 	segment_1.rotation.x = base_angle
-
-	if middle_angle == 0: #if extend maximum
-		desired_state = DesiredState.MUST_RESTEP
-		#is_returning = true #overrides controller
-	elif middle_angle < PI/5:
-		desired_state = DesiredState.NEEDS_RESTEP
 
 ## get angle of second segment
 func _get_middle_angle(L2:float,L1:float,target:Vector2) -> float:
@@ -375,8 +376,7 @@ func _check_end_ground_phase() -> void:
 	var dist_too_low: bool = horizontal_target_diff < .1
 	dist_too_low = false
 	if dist_too_large or dist_too_low:
-		#is_returning = true
-		desired_state = DesiredState.MUST_RESTEP
+		is_returning = true
 
 
 ## draw trajectory (used for walk simulation path)
@@ -525,16 +525,6 @@ func _get_IK_variables(target:Vector3) -> Dictionary[String,Vector2]:
 
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	top_down_tg = Vector2(target.x,target.z)
-
-	var diff:Vector2 = (top_down_tg-Vector2(start_pos.x,start_pos.z))
-
-	if diff < Vector2.ZERO:
-		#is_returning = true #overrides controller
-		desired_state = DesiredState.MUST_RESTEP
-
-	elif diff < Vector2.ONE * min_dist_to_base:
-		desired_state = DesiredState.NEEDS_RESTEP
-
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
 	var intermediate_tg:Vector2 = _get_intermediate_target(segment_3.segment_length,side_view_tg)
 	return {"top_down_tg":top_down_tg,"direction":direction,"intermediate_tg":intermediate_tg}
