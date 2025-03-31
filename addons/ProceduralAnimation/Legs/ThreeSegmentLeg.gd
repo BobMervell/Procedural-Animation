@@ -416,7 +416,7 @@ func get_rest_pos() -> Vector3:
 
 	var potential_rest_pos:Array[Vector3]
 	var limit:Vector3 = default_pos + Vector3(0,-max_length,0)
-	var new_pos:Vector3 = cast_ray(query_start, limit)
+	var new_pos = cast_ray(query_start, limit)
 	if new_pos:
 		potential_rest_pos.append(new_pos)
 
