@@ -42,7 +42,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.999292, -7.15133e-08, 1.74713e-07, 7.14749e-08, 0.999829, -2.38238e-07, -1.74722e-07, 2.38378e-07, 0.999244, -22.131, -10.7977, 60.192)
+transform = Transform3D(0.999294, -1.16812e-06, 1.74714e-07, 1.16733e-06, 0.999862, 0.000753646, -1.75602e-07, -0.00075411, 0.999247, -34.86, -10.9077, 60.192)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
@@ -174,8 +174,7 @@ front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
-target_position_2D = Vector2(-22.131, 60.192)
-target_rotation_y = 6.28319
+target_position_2D = Vector2(-34.86, 60.192)
 body_desired_height = 2.808
 slope_adapt_tilt_ratio = 0.5
 _move_second_order_config = {

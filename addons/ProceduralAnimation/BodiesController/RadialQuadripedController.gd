@@ -225,11 +225,11 @@ func _move_legs(delta:float) -> void:
 		leg.is_body_rotating = is_body_rotating
 		leg.movement_dir = lerp(leg.movement_dir,body_direction.normalized(),.05)
 		if leg.is_returning:
-			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position)
+			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position).limit_length(leg.max_leg_size)
 			if leg.is_return_phase_finished():
 				leg.is_returning = false
 		else:
-			leg.target_marker.global_position = leg.global_current_ground_pos
+			leg.target_marker.position = leg.to_local(leg.global_current_ground_pos).limit_length(leg.max_leg_size)
 
 func _get_returning_pair() -> Array[ThreeSegmentLegClass]:
 	var already_returning:bool = false

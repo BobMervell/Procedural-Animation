@@ -185,7 +185,8 @@ var global_current_ground_pos:Vector3
 var is_foot_on_ground:bool = true
 ## bool used for dynamic gate control when body is turning around
 var is_body_rotating:bool = false
-
+## maximum length of the leg.
+var max_leg_size
 #endregion
 
 ## leg's element
@@ -204,6 +205,7 @@ func _ready() -> void:
 	global_current_ground_pos = to_global(rest_pos)
 	_output_intermediate_target = Vector2.ZERO
 	_output_direction = Vector2.ZERO
+	max_leg_size = segment_1_length + segment_2_length + segment_3_length
 	_rota_second_order = SecondOrderSystem.new(_rota_second_order_config)
 	_extension_second_order = SecondOrderSystem.new(_extension_second_order_config)
 
@@ -300,7 +302,7 @@ func _update_desired_state() -> void:
 func _rotate_base() -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
 	var limit_amplitude:float = rotation_amplitude *.5
-	if is_body_rotating: limit_amplitude *=.5
+	if is_body_rotating: limit_amplitude *=.3
 	if base.rotation.y > limit_amplitude + PI/2 or base.rotation.y < -limit_amplitude + PI/2:
 		desired_state = DesiredState.MUST_RESTEP
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
