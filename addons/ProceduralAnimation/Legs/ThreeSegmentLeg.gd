@@ -183,6 +183,9 @@ var desired_state:int = DesiredState.OK_ON_GROUND
 var global_current_ground_pos:Vector3
 ## color=red]Warning:[/color] Not implemented yet, will be used for gravity implementation
 var is_foot_on_ground:bool = true
+## bool used for dynamic gate control when body is turning around
+var is_body_rotating:bool = false
+
 #endregion
 
 ## leg's element
@@ -296,7 +299,9 @@ func _update_desired_state() -> void:
 ## rotate leg towards target
 func _rotate_base() -> void:
 	base.rotation.y = - IK_variables["direction"].angle() + PI/2
-	if base.rotation.y > rotation_amplitude*.5 + PI/2 or base.rotation.y < -rotation_amplitude*.5 + PI/2:
+	var limit_amplitude:float = rotation_amplitude *.5
+	if is_body_rotating: limit_amplitude *=.5
+	if base.rotation.y > limit_amplitude + PI/2 or base.rotation.y < -limit_amplitude + PI/2:
 		desired_state = DesiredState.MUST_RESTEP
 	base.position.x = -base.segment_length/2*cos(base.rotation.y - PI/2)
 	base.position.z = +base.segment_length/2*sin(base.rotation.y- PI/2)

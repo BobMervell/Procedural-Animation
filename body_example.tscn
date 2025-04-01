@@ -42,7 +42,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.999288, 0, 2.8026e-45, 0, 0.999828, 0, -2.8026e-45, 0, 0.999248, -24.818, -10.9157, 59.453)
+transform = Transform3D(0.999292, -7.15133e-08, 1.74713e-07, 7.14749e-08, 0.999829, -2.38238e-07, -1.74722e-07, 2.38378e-07, 0.999244, -22.131, -10.7977, 60.192)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
@@ -168,12 +168,14 @@ _show_rest_pos_marker = true
 
 [node name="RadialQuadripedController" type="Node3D" parent="Robot" node_paths=PackedStringArray("front_left_leg", "front_right_leg", "hind_right_leg", "hind_left_leg", "body", "_move_second_order", "_rotation_second_order")]
 script = ExtResource("2_2rfbf")
+editor_process = true
 front_left_leg = NodePath("../LegFL")
 front_right_leg = NodePath("../LegFR")
 hind_right_leg = NodePath("../LegHR")
 hind_left_leg = NodePath("../LegHL")
 body = NodePath("..")
-target_position_2D = Vector2(-24.818, 59.453)
+target_position_2D = Vector2(-22.131, 60.192)
+target_rotation_y = 6.28319
 body_desired_height = 2.808
 slope_adapt_tilt_ratio = 0.5
 _move_second_order_config = {

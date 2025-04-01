@@ -61,11 +61,13 @@ var _old_body_pos:Vector3
 ## used to verify if moved via target_position_2D or directly
 var _old_estimated_position_2D:Vector2
 ## used to verify if rotated via target_rotation_y or directly
-var _old_estimated_direction_y:float
+var _old_estimated_rotation_y:float
 ## used to verify if moved via body_height() or directly
 var old_estimated_position_y:float
 ## body movement_direction used for tilt and rest pos placement
 var body_direction:Vector3 = Vector3.ZERO
+## bool used for dynamic gate control when body is turning around
+var is_body_rotating:bool = false
 #region Setup.
 
 func _ready() -> void:
@@ -144,8 +146,8 @@ func _move_body(delta:float) -> void:
 
 func _rotate_body(delta:float) -> void:
 	var real_direction:Vector2 = Vector2.from_angle(body.rotation.y)
-	var angle_diff:float = abs(atan2(sin(_old_estimated_direction_y - body.rotation.y),
-			cos(_old_estimated_direction_y - body.rotation.y)))
+	var angle_diff:float = abs(atan2(sin(_old_estimated_rotation_y - body.rotation.y),
+			cos(_old_estimated_rotation_y - body.rotation.y)))
 	if (angle_diff < .0001):
 		var desired_direction:Vector2 = Vector2.from_angle(target_rotation_y)
 		real_direction = _rotation_second_order.vec2_second_order_response(
@@ -153,7 +155,8 @@ func _rotate_body(delta:float) -> void:
 		body.rotation.y = real_direction.angle()
 	else:#if moved directly
 		target_rotation_y = body.rotation.y
-	_old_estimated_direction_y = body.rotation.y
+	is_body_rotating = abs(_old_estimated_rotation_y-body.rotation.y) >.001
+	_old_estimated_rotation_y = body.rotation.y
 
 func _update_body_height(delta:float) -> void:
 	var diff:float = old_estimated_position_y-body.global_position.y
@@ -164,8 +167,6 @@ func _update_body_height(delta:float) -> void:
 		mean_height /= _legs.size()
 		var ground_height:float = get_ground_level()
 		var height_diff:float = min(mean_height - ground_height,body_desired_height*height_variation_ratio)
-		#print(mean_height)
-		#mean_height = get_ground_level() - body_desired_height
 		# able to use same second order as _move_body() cause different method (float vs vector2)
 		var target_height:float = ground_height + body_desired_height + height_diff*height_variation_ratio
 		body.global_position.y = _move_second_order.float_second_order_response(delta,
@@ -221,6 +222,7 @@ func _move_legs(delta:float) -> void:
 		leg.rest_pos = leg.get_rest_pos()
 		leg.is_returning = true
 	for leg:ThreeSegmentLegClass in _legs:
+		leg.is_body_rotating = is_body_rotating
 		leg.movement_dir = lerp(leg.movement_dir,body_direction.normalized(),.05)
 		if leg.is_returning:
 			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position)
