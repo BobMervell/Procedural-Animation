@@ -202,8 +202,8 @@ func _tilt_body() -> void:
 
 	var x_size:float = front_left_leg.rest_pos.distance_to(front_right_leg.rest_pos)
 	var z_size:float = front_left_leg.rest_pos.distance_to(hind_left_leg.rest_pos)
-	var x_angle:float = asin((hind_height - front_height)/5)
-	var z_angle:float = asin((left_height - right_height)/5)
+	var x_angle:float = asin((hind_height - front_height)/x_size)
+	var z_angle:float = asin((left_height - right_height)/z_size)
 
 	var x_speed_tilt:float = atan(body_direction.z*tilt_ratio/(2*PI))
 	x_speed_tilt = clamp(x_speed_tilt,-max_tilt_angle,max_tilt_angle)

@@ -42,7 +42,7 @@ shadow_enabled = true
 environment = SubResource("Environment_emocc")
 
 [node name="Robot" type="Node3D" parent="."]
-transform = Transform3D(0.999294, -1.16812e-06, 1.74714e-07, 1.16733e-06, 0.999862, 0.000753646, -1.75602e-07, -0.00075411, 0.999247, -34.86, -10.9077, 60.192)
+transform = Transform3D(0.999294, 0.000180957, 1.74714e-07, -0.000180832, 0.999985, 0.000181157, -1.41938e-07, -0.000181291, 0.999248, -34.86, -10.9077, 60.192)
 script = ExtResource("1_2rfbf")
 
 [node name="Head" type="CSGBox3D" parent="Robot"]
