@@ -124,6 +124,7 @@ func _physics_process(delta: float) -> void:
 		_move_legs(delta)
 		_update_body_height(delta)
 		_rotate_body(delta)
+
 		_tilt_body()
 		body_direction = lerp(body_direction,(body.global_position -_old_body_pos)/delta,.1)
 		_old_body_pos = body.global_position
@@ -202,6 +203,7 @@ func _tilt_body() -> void:
 
 	var x_size:float = front_left_leg.rest_pos.distance_to(front_right_leg.rest_pos)
 	var z_size:float = front_left_leg.rest_pos.distance_to(hind_left_leg.rest_pos)
+	if x_size == 0 or z_size == 0: return
 	var x_angle:float = asin((hind_height - front_height)/x_size)
 	var z_angle:float = asin((left_height - right_height)/z_size)
 

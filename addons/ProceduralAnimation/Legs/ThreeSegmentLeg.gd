@@ -186,7 +186,7 @@ var is_foot_on_ground:bool = true
 ## bool used for dynamic gate control when body is turning around
 var is_body_rotating:bool = false
 ## maximum length of the leg.
-var max_leg_size
+var max_leg_size:float
 #endregion
 
 ## leg's element
@@ -202,6 +202,7 @@ func _ready() -> void:
 	_get_nodes()
 	_update_segment_lengths()
 	rest_pos = get_rest_pos()
+	target_marker.position = rest_pos
 	global_current_ground_pos = to_global(rest_pos)
 	_output_intermediate_target = Vector2.ZERO
 	_output_direction = Vector2.ZERO
@@ -419,17 +420,14 @@ func get_rest_pos() -> Vector3:
 			+ Vector3(base_offset.x,0,base_offset.z) + dir_offset)
 	var max_extend_length:float = segment_1.segment_length  + segment_2.segment_length + segment_3.segment_length
 	var query_start:Vector3 = default_pos + Vector3(0,max_extend_length/3,0)
-
 	#var debug = _add_marker(Color.SPRING_GREEN)
 	#debug.global_position = to_global(query_start)
-
 	var potential_rest_pos:Array[Vector3]
 	var limit:Vector3 = default_pos + Vector3(0,-max_extend_length * 2,0)
 	@warning_ignore("untyped_declaration")
 	var new_pos = cast_ray(query_start, limit)
 	if new_pos:
 		potential_rest_pos.append(new_pos)
-
 	var rotations: Array = [
 		Vector3(0, 0, 1),
 		#Vector3(0, 0, -1), #not used because often just under hip
@@ -446,6 +444,8 @@ func get_rest_pos() -> Vector3:
 	#debug2.global_position = to_global(default_pos)
 	#var debug3 = _add_marker(Color.GREEN)
 	#debug3.global_position = to_global(rest_position)
+	if not rest_position.is_finite():
+		return Vector3(rest_distance,0,0) + Vector3(base_offset.x,0,base_offset.z)
 	return rest_position
 
 ## returns the best resting position among an array of candidate.
@@ -529,7 +529,6 @@ func _get_IK_variables(target:Vector3) -> Dictionary[String,Vector2]:
 	var start_pos:Vector3 = to_local(base.global_position)
 	var top_down_tg:Vector2 = Vector2(target.x,target.z)
 	var direction:Vector2 = Vector2(start_pos.x,start_pos.z).direction_to(top_down_tg)
-
 	target -= leg_offset.rotated(Vector3.UP,base.rotation.y)
 	top_down_tg = Vector2(target.x,target.z)
 	var side_view_tg:Vector2 = Vector2(top_down_tg.length(),-target.y)
