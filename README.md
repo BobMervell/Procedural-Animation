@@ -68,7 +68,7 @@ By following these steps, you can effectively integrate the Procedural Animation
 
 ## 📝 License:
 
-This project is licensed under the CC BY-NC 4.0, you can use and modify it except for commercial uses credit is needed. 
+This project is licensed under the MIT, you can use and modify freely, credit is not mandatory but really appreciated. 
 
 ## 🌟 Support:
 
