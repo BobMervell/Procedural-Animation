@@ -547,4 +547,3 @@ func _get_intermediate_target3D(top_down_target:Vector2,intermediate_tg:Vector2)
 	return Vector3(intermediate_top_down.x,
 			 -intermediate_tg.y, intermediate_top_down.y)
 #endregion
-

@@ -124,7 +124,6 @@ func _physics_process(delta: float) -> void:
 		_move_legs(delta)
 		_update_body_height(delta)
 		_rotate_body(delta)
-
 		_tilt_body()
 		body_direction = lerp(body_direction,(body.global_position -_old_body_pos)/delta,.1)
 		_old_body_pos = body.global_position
@@ -164,7 +163,9 @@ func _update_body_height(delta:float) -> void:
 	if ( abs(diff)<.1):
 		var mean_height:float = 0
 		for leg:ThreeSegmentLegClass in _legs:
-			mean_height += leg.target_marker.global_position.y
+			if leg.is_inside_tree():
+				mean_height += leg.target_marker.global_position.y
+			else: mean_height += mean_height
 		mean_height /= _legs.size()
 		var ground_height:float = get_ground_level()
 		var height_diff:float = min(mean_height - ground_height,body_desired_height*height_variation_ratio)
@@ -220,18 +221,20 @@ func _tilt_body() -> void:
 #endregion
 
 func _move_legs(delta:float) -> void:
+	pass
 	for leg: ThreeSegmentLegClass in _get_returning_pair():
 		leg.rest_pos = leg.get_rest_pos()
 		leg.is_returning = true
 	for leg:ThreeSegmentLegClass in _legs:
-		leg.is_body_rotating = is_body_rotating
-		leg.movement_dir = lerp(leg.movement_dir,body_direction.normalized(),.05)
-		if leg.is_returning:
-			leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position).limit_length(leg.max_leg_size)
-			if leg.is_return_phase_finished():
-				leg.is_returning = false
-		else:
-			leg.target_marker.position = leg.to_local(leg.global_current_ground_pos).limit_length(leg.max_leg_size)
+		if leg.is_inside_tree():
+			leg.is_body_rotating = is_body_rotating
+			leg.movement_dir = lerp(leg.movement_dir,body_direction.normalized(),.05)
+			if leg.is_returning:
+				leg.target_marker.position = leg.get_returning_position(delta,leg.target_marker.position).limit_length(leg.max_leg_size)
+				if leg.is_return_phase_finished():
+					leg.is_returning = false
+			else:
+				leg.target_marker.position = leg.to_local(leg.global_current_ground_pos).limit_length(leg.max_leg_size)
 
 func _get_returning_pair() -> Array[ThreeSegmentLegClass]:
 	var already_returning:bool = false
@@ -249,4 +252,3 @@ func _get_returning_pair() -> Array[ThreeSegmentLegClass]:
 				if _diagonal_legs_1.has(leg): return _diagonal_legs_1
 				return _diagonal_legs_2
 	return []
-
