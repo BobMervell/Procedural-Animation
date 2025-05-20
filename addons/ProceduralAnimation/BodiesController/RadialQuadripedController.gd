@@ -171,7 +171,6 @@ func _update_body_height(delta:float) -> void:
 			else: missing_legs +=1
 		mean_height /= (_legs.size() - body_desired_height)
 		var ground_height:float = get_ground_level()
-		print(ground_height)
 		var height_diff:float = min(mean_height - ground_height,body_desired_height*height_variation_ratio)
 		# able to use same second order as _move_body() cause different method (float vs vector2)
 		var target_height:float = ground_height + body_desired_height + height_diff*height_variation_ratio
