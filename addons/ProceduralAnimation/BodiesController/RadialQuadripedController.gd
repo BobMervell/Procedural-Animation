@@ -16,12 +16,14 @@ class_name RadialQuadripedController
 @export var hind_left_leg:ThreeSegmentLegClass
 ## main body node
 @export var body:Node3D
+## Mask used for ground detection for foot placement (areas included).
+@export_flags_3d_physics var ground_mask:int
 ## Target position in a top down view (x,z)
 @export var target_position_2D:Vector2
 ##Target rotation along the y axis
 @export_range(0,2*PI,.001) var target_rotation_y:float
 ## desired body height
-@export var body_desired_height:float = 3
+@export var body_desired_height:float = .5
 ## Multiplier for height variation during a walk cycle
 @export_range(0,1,.001) var height_variation_ratio:float = .8
 @export_range(0,1,.001,"exp") var slope_adapt_tilt_ratio:float = .1
@@ -162,12 +164,14 @@ func _update_body_height(delta:float) -> void:
 	var diff:float = old_estimated_position_y-body.global_position.y
 	if ( abs(diff)<.1):
 		var mean_height:float = 0
+		var missing_legs:int = 0
 		for leg:ThreeSegmentLegClass in _legs:
-			if leg.is_inside_tree():
+			if leg.is_inside_tree() and leg.is_foot_on_ground:
 				mean_height += leg.target_marker.global_position.y
-			else: mean_height += mean_height
-		mean_height /= _legs.size()
+			else: missing_legs +=1
+		mean_height /= (_legs.size() - body_desired_height)
 		var ground_height:float = get_ground_level()
+		print(ground_height)
 		var height_diff:float = min(mean_height - ground_height,body_desired_height*height_variation_ratio)
 		# able to use same second order as _move_body() cause different method (float vs vector2)
 		var target_height:float = ground_height + body_desired_height + height_diff*height_variation_ratio
@@ -187,6 +191,7 @@ func get_ground_level() -> float:
 	var query_limit:Vector3 = query_start + Vector3(0,-max_length,0)
 	var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(query_start,query_limit)
 	query.collide_with_areas = true
+	query.collision_mask = ground_mask
 	var result:Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 	if not result.is_empty():
 		ground_height = result["position"].y
