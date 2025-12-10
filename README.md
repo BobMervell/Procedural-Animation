@@ -1,6 +1,6 @@
 # Procedural animation
 
-Procedural Animation Addon ⚙️🎮 A Godot addon that introduces a suite of dedicated nodes designed to facilitate the creation of highly customizable procedural movements within the Godot Engine.
+Procedural Animation Addon ⚙️🎮 An addon for Godot 4.4 ( may work but untested for later versions) that introduces a suite of dedicated nodes designed to facilitate the creation of highly customizable procedural movements within the Godot Engine.
 ![robot movement](https://github.com/user-attachments/assets/acbd62a2-9462-43af-9b7b-72059f442403)
 
 ## Repository States
