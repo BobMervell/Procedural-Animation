@@ -3,6 +3,20 @@
 Procedural Animation Addon ⚙️🎮 A Godot addon that introduces a suite of dedicated nodes designed to facilitate the creation of highly customizable procedural movements within the Godot Engine.
 ![robot movement](https://github.com/user-attachments/assets/acbd62a2-9462-43af-9b7b-72059f442403)
 
+## Repository States
+![Status: Unmanaged](https://img.shields.io/badge/status-unmanaged-gray)
+![Status: Experimental](https://img.shields.io/badge/status-experimental-blue)
+
+### **Experimental**
+- The repository contains features or ideas that are in a testing phase.
+- Not intended for production use, and stability is not guaranteed.
+
+### **Unmanaged**
+- The repository exists but has no active maintainers.
+- No updates, support, or management of issues are expected.
+
+
+
 # ✨ Features:
 
 ✔️ Advanced Leg Configuration – Customize leg segments with precise control over bones lengths and positions allowing for configurable legs structures.
